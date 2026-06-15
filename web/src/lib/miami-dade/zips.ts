@@ -1,0 +1,30 @@
+/**
+ * Miami-Dade County ZIP codes (unincorporated + municipalities).
+ * Source: USPS / county property appraiser coverage.
+ */
+export const MIAMI_DADE_ZIP_CODES = [
+  // South / Homestead / Florida City
+  "33010", "33012", "33013", "33014", "33015", "33016", "33018",
+  "33030", "33031", "33032", "33033", "33034", "33035", "33039",
+  "33054", "33055", "33056",
+  // Miami / inner suburbs
+  "33101", "33109", "33122", "33125", "33126", "33127", "33128", "33129",
+  "33130", "33131", "33132", "33133", "33134", "33135", "33136", "33137",
+  "33138", "33139", "33140", "33141", "33142", "33143", "33144", "33145",
+  "33146", "33147", "33149", "33150", "33154", "33155", "33156", "33157",
+  "33158", "33160", "33161", "33162", "33165", "33166", "33167", "33168",
+  "33169", "33170", "33172", "33173", "33174", "33175", "33176", "33177",
+  "33178", "33179", "33180", "33181", "33182", "33183", "33184", "33185",
+  "33186", "33187", "33189", "33190", "33193", "33194", "33196",
+  // Keys / other
+  "33001", "33036", "33037", "33040", "33042", "33043", "33050", "33070",
+] as const;
+
+export function isMiamiDadeZip(zip: string): boolean {
+  const normalized = zip.trim().slice(0, 5);
+  return (MIAMI_DADE_ZIP_CODES as readonly string[]).includes(normalized);
+}
+
+export function normalizeZipInput(zip: string): string {
+  return zip.trim().split("-")[0].slice(0, 5);
+}
