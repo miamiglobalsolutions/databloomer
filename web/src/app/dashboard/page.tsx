@@ -32,6 +32,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             >
               About
             </Link>
+            <Link
+              href="/subscribe"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-orange-700 hover:bg-orange-50"
+            >
+              Subscribe
+            </Link>
             <TabLink
               href="/dashboard?type=aging_roof"
               active={type === "aging_roof"}

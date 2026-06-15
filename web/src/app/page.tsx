@@ -43,31 +43,24 @@ export default function HomePage() {
 
 
         <div className="mt-10 flex flex-wrap gap-4">
-
           <Link
-
             href="/dashboard?type=aging_roof&view=map"
-
             className="rounded-lg bg-orange-600 px-6 py-3 font-medium text-white hover:bg-orange-700"
-
           >
-
             Open Bloom Zones
-
           </Link>
-
           <Link
-
             href="/dashboard?type=aging_roof"
-
             className="rounded-lg border border-stone-300 bg-white px-6 py-3 font-medium text-stone-800 hover:bg-stone-50"
-
           >
-
             View lead list
-
           </Link>
-
+          <Link
+            href="/subscribe"
+            className="rounded-lg border border-orange-300 bg-orange-50 px-6 py-3 font-medium text-orange-900 hover:bg-orange-100"
+          >
+            What you get as a subscriber
+          </Link>
         </div>
 
       </section>

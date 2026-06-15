@@ -18,7 +18,7 @@ export function SiteHeader({ active }: Props) {
           <NavLink href="/about" active={active === "about"}>
             About
           </NavLink>
-          <NavLink href="/subscribe" active={active === "subscribe"}>
+          <NavLink href="/subscribe" active={active === "subscribe"} highlight>
             Subscribe
           </NavLink>
           <Link
@@ -40,10 +40,12 @@ export function SiteHeader({ active }: Props) {
 function NavLink({
   href,
   active,
+  highlight,
   children,
 }: {
   href: string;
   active?: boolean;
+  highlight?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -51,8 +53,12 @@ function NavLink({
       href={href}
       className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
         active
-          ? "bg-stone-900 text-white"
-          : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+          ? highlight
+            ? "bg-orange-600 text-white"
+            : "bg-stone-900 text-white"
+          : highlight
+            ? "text-orange-700 hover:bg-orange-50"
+            : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
       }`}
     >
       {children}
