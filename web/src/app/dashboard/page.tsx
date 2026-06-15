@@ -25,7 +25,13 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             <span className="hidden text-stone-400 sm:inline">/</span>
             <span className="text-sm text-stone-600">Lead dashboard</span>
           </div>
-          <nav className="flex gap-2">
+          <nav className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/about"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100"
+            >
+              About
+            </Link>
             <TabLink
               href="/dashboard?type=aging_roof"
               active={type === "aging_roof"}
@@ -44,10 +50,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       <div className="mx-auto max-w-7xl px-6 py-8">
         {type === "aging_roof" && (
           <div className="mb-6 rounded-xl border border-orange-200 bg-orange-50 px-5 py-4 text-sm text-orange-950">
-            <strong>Aging roofs are your bread and butter.</strong> Leads are ranked
-            by roof age (targeting 13–17 years), home value, and permit confidence.
-            Add <code className="rounded bg-orange-100 px-1">SHOVELS_API_KEY</code> for
-            historical permit accuracy beyond the county&apos;s 3-year GIS window.
+            <strong>Aging roofs are your bread and butter.</strong> Leads in the
+            deploy canvassers to the highest-opportunity neighborhoods. Use{" "}
+            <strong>Bloom Zones</strong> to see color-coded pins by{" "}
+            <strong>DataBloom Score</strong>. High confidence = recorded roof
+            permit; medium = estimated from year built.
+          </div>
+        )}
+
+        {type === "code_violation" && (
+          <div className="mb-6 rounded-xl border border-stone-200 bg-stone-100 px-5 py-4 text-sm text-stone-800">
+            <strong>Open code enforcement cases.</strong> Miami-Dade does not tag
+            violations as &ldquo;roof&rdquo; in its public GIS — roof problems usually
+            appear as structure or minimum-housing maintenance cases. These are active
+            (&ldquo;Open&rdquo;) enforcement leads worth a door knock or call.
           </div>
         )}
 

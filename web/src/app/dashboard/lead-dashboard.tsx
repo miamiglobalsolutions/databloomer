@@ -1,11 +1,24 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  BloomZoneFilter,
+  defaultBloomZoneTiers,
+} from "@/components/bloom-zone-filter";
+import { DigestSubscribe } from "@/components/digest-subscribe";
+import type { BloomZoneTier } from "@/lib/leads/databloom-score";
+import { filterLeadsByBloomZone } from "@/lib/leads/databloom-score";
+import { computeTopBloomZips } from "@/lib/leads/bloom-zips";
+import { downloadLeadsCsv } from "@/lib/leads/export-csv";
+import { hasFullSubscriberAccess } from "@/lib/subscription/access";
 import type { LeadRecord } from "@/lib/leads/types";
-import { normalizeZipInput } from "@/lib/miami-dade/zips";
 import { AREA_ZIP_SHORTCUTS } from "@/lib/miami-dade/areas";
+import { normalizeZipInput } from "@/lib/miami-dade/zips";
+import type { BloomMapStyle } from "./lead-map";
 import { LeadCard } from "./lead-card";
+import { TopBloomZipsPanel } from "./top-bloom-zips";
 
 const LeadMap = dynamic(
   () => import("./lead-map").then((m) => m.LeadMap),
@@ -13,7 +26,7 @@ const LeadMap = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex h-[min(70vh,640px)] items-center justify-center rounded-xl border border-stone-200 bg-stone-50 text-sm text-stone-500">
-        Loading map…
+        Loading Bloom Zones…
       </div>
     ),
   },
@@ -35,6 +48,10 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalLeads, setTotalLeads] = useState<number | null>(null);
+  const [mapStyle, setMapStyle] = useState<BloomMapStyle>("zones");
+  const [activeBloomTiers, setActiveBloomTiers] = useState<Set<BloomZoneTier>>(
+    defaultBloomZoneTiers,
+  );
 
   const loadLeads = useCallback(async () => {
     setLoading(true);
@@ -47,7 +64,6 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
         params.set("zip", zipFilter);
         params.set("limit", "500");
       } else if (view === "map") {
-        // Map "All county" — load every lead so all areas get pins
         params.set("limit", "8500");
       } else {
         params.set("diverse", "true");
@@ -73,7 +89,18 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
     loadLeads();
   }, [loadLeads]);
 
-  const selectedLead = leads.find((l) => l.id === selectedId) ?? null;
+  const filteredLeads = useMemo(
+    () => filterLeadsByBloomZone(leads, activeBloomTiers),
+    [leads, activeBloomTiers],
+  );
+
+  const selectedLead =
+    filteredLeads.find((l) => l.id === selectedId) ?? null;
+  const topBloomZips = useMemo(
+    () => computeTopBloomZips(filteredLeads, 5),
+    [filteredLeads],
+  );
+  const canExport = hasFullSubscriberAccess();
 
   return (
     <div className="space-y-6">
@@ -98,16 +125,28 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
           >
             Refresh
           </button>
+          <button
+            type="button"
+            disabled={filteredLeads.length === 0 || !canExport}
+            onClick={() => downloadLeadsCsv(filteredLeads, type)}
+            className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-800 hover:bg-stone-50 disabled:opacity-50"
+            title={
+              canExport
+                ? "Download CSV"
+                : "Subscribe for full CSV export with addresses"
+            }
+          >
+            Export CSV
+          </button>
           <p className="text-sm text-stone-500">
-            {loading ? "Loading…" : `${leads.length} leads`}
+            {loading
+              ? "Loading…"
+              : `${filteredLeads.length} shown${filteredLeads.length !== leads.length ? ` of ${leads.length}` : ""}`}
             {!loading && !normalizeZipInput(zip) && view === "map" && totalLeads != null && (
               <span className="text-stone-400">
                 {" "}
                 · {leads.length >= totalLeads ? "full county" : `of ${totalLeads} total`}
               </span>
-            )}
-            {!loading && !normalizeZipInput(zip) && view === "list" && (
-              <span className="text-stone-400"> · sampled across all zips</span>
             )}
           </p>
         </div>
@@ -117,10 +156,25 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
             List
           </ViewButton>
           <ViewButton active={view === "map"} onClick={() => setView("map")}>
-            Map
+            Bloom Zones
           </ViewButton>
         </div>
       </div>
+
+      <BloomZoneFilter
+        activeTiers={activeBloomTiers}
+        onChange={setActiveBloomTiers}
+      />
+
+      {!canExport && (
+        <p className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-950">
+          Preview mode: addresses and folios are masked.{" "}
+          <Link href="/subscribe" className="font-medium underline">
+            Subscribe
+          </Link>{" "}
+          for full canvassing data and CSV export.
+        </p>
+      )}
 
       <div className="flex flex-wrap gap-2">
         {AREA_ZIP_SHORTCUTS.map((area) => {
@@ -143,63 +197,94 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
         })}
       </div>
 
-      {!normalizeZipInput(zip) && !loading && view === "map" && (
-        <p className="text-sm text-stone-500">
-          All county map loads every lead with coordinates
-          {totalLeads != null ? ` (${totalLeads.toLocaleString()} in database)` : ""}.
-          Use a ZIP shortcut to focus on one area.
-        </p>
-      )}
-
-      {!normalizeZipInput(zip) && !loading && view === "list" && (
-        <p className="text-sm text-stone-500">
-          List view shows top leads from every ZIP. Use a shortcut above or enter a
-          ZIP (e.g. 33131, 33139) to see all leads in that area.
-        </p>
-      )}
-
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           {error}
-          <p className="mt-2 text-xs text-red-700">
-            Run <code className="rounded bg-red-100 px-1">npm run ingest</code> to
-            load live Miami-Dade leads.
-          </p>
         </div>
       )}
 
       {view === "map" ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-          <LeadMap
-            leads={leads}
-            type={type}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-          <aside className="space-y-3">
-            <h2 className="text-sm font-semibold text-stone-700">
-              {selectedLead ? "Selected lead" : "Click a pin for details"}
-            </h2>
-            {selectedLead ? (
-              <LeadCard lead={selectedLead} type={type} />
-            ) : (
-              <p className="rounded-xl border border-dashed border-stone-300 p-6 text-sm text-stone-500">
-                Select a marker on the map to see full lead details here.
-              </p>
-            )}
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-3 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                Map style
+              </span>
+              <button
+                type="button"
+                onClick={() => setMapStyle("zones")}
+                className={`rounded-md px-3 py-1 text-xs font-medium ${
+                  mapStyle === "zones"
+                    ? "bg-stone-900 text-white"
+                    : "bg-white text-stone-600"
+                }`}
+              >
+                Bloom colors
+              </button>
+              <button
+                type="button"
+                onClick={() => setMapStyle("minimal")}
+                className={`rounded-md px-3 py-1 text-xs font-medium ${
+                  mapStyle === "minimal"
+                    ? "bg-stone-900 text-white"
+                    : "bg-white text-stone-600"
+                }`}
+              >
+                Minimal pins
+              </button>
+            </div>
+            <LeadMap
+              leads={filteredLeads}
+              type={type}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              mapStyle={mapStyle}
+            />
+          </div>
+          <aside className="space-y-4">
+            <TopBloomZipsPanel
+              zips={topBloomZips}
+              activeZip={normalizeZipInput(zip)}
+              onSelectZip={setZip}
+            />
+            <div>
+              <h2 className="mb-2 text-sm font-semibold text-stone-700">
+                {selectedLead ? "Selected lead" : "Click a pin for details"}
+              </h2>
+              {selectedLead ? (
+                <LeadCard lead={selectedLead} type={type} />
+              ) : (
+                <p className="rounded-xl border border-dashed border-stone-300 p-6 text-sm text-stone-500">
+                  Click a color-coded pin to see lead details here.
+                </p>
+              )}
+            </div>
+            <DigestSubscribe compact />
           </aside>
         </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {leads.map((lead) => (
-            <LeadCard key={lead.id} lead={lead} type={type} />
-          ))}
+        <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+          <div className="grid gap-4 lg:grid-cols-2">
+            {filteredLeads.map((lead) => (
+              <LeadCard key={lead.id} lead={lead} type={type} />
+            ))}
+          </div>
+          <aside className="space-y-4">
+            <TopBloomZipsPanel
+              zips={topBloomZips}
+              activeZip={normalizeZipInput(zip)}
+              onSelectZip={setZip}
+            />
+            <DigestSubscribe compact />
+          </aside>
         </div>
       )}
 
-      {!loading && leads.length === 0 && !error && (
+      {!loading && filteredLeads.length === 0 && !error && (
         <div className="rounded-xl border border-dashed border-stone-300 p-12 text-center text-stone-500">
-          No leads yet. Run ingest to populate the database.
+          {leads.length > 0
+            ? "No leads match the selected Bloom Zones. Try enabling more color tiers."
+            : "No leads yet. Run ingest to populate the database."}
         </div>
       )}
     </div>

@@ -1,4 +1,9 @@
-import { ARCGIS, ROOF_PERMIT_TYPE_CODES, ROOF_VIOLATION_KEYWORDS } from "./constants";
+import {
+  ARCGIS,
+  ROOF_PERMIT_TYPE_CODES,
+  ROOF_RELATED_VIOLATION_DESC_PATTERNS,
+  VIOLATIONS_OPEN_ONLY,
+} from "./constants";
 
 type ArcGISGeometry =
   | { x: number; y: number }
@@ -252,39 +257,54 @@ export async function fetchRoofPermits(options?: {
   return parsed;
 }
 
+function buildRoofViolationWhereClause(openOnly = VIOLATIONS_OPEN_ONLY): string {
+  const categoryFilter = ROOF_RELATED_VIOLATION_DESC_PATTERNS.map(
+    (pattern) => `PROBLEM_DESC LIKE '%${pattern}%'`,
+  ).join(" OR ");
+
+  if (openOnly) {
+    return `(${categoryFilter}) AND STAT_DESC LIKE '%Open%'`;
+  }
+
+  return categoryFilter;
+}
+
 export async function fetchRoofViolations(options?: {
   maxRecords?: number;
+  openOnly?: boolean;
 }): Promise<ParsedViolation[]> {
-  const where = `UPPER(PROBLEM_DESC) LIKE '%ROOF%'`;
+  const where = buildRoofViolationWhereClause(options?.openOnly);
 
   const features = await arcgisQueryAll<ViolationAttributes>(
     ARCGIS.codeViolations,
     {
       where,
       outFields:
-        "OBJECTID,CASE_NUM,CASE_DATE,STAT_DESC,ADDRESS,FOLIO,PROBLEM,PROBLEM_DESC,CASE_STATUS,X_COORD,Y_COORD",
-      returnGeometry: "false",
+        "OBJECTID,CASE_NUM,CASE_DATE,STAT_DESC,ADDRESS,FOLIO,PROBLEM,PROBLEM_DESC,CASE_STATUS",
+      returnGeometry: "true",
+      outSR: "4326",
       orderByFields: "CASE_DATE DESC",
       f: "json",
     },
-    { pageSize: 500, maxRecords: options?.maxRecords ?? 2000 },
+    { pageSize: 500, maxRecords: options?.maxRecords ?? 500 },
   );
 
   const parsed: ParsedViolation[] = [];
   for (const feature of features) {
     const attrs = feature.attributes;
+    const coords = geometryToLatLng(feature.geometry);
     parsed.push({
       id: `arcgis-violation-${attrs.OBJECTID}`,
       folio: normalizeFolio(attrs.FOLIO),
       case_number: attrs.CASE_NUM ?? null,
       address: attrs.ADDRESS?.trim() ?? null,
       case_date: arcgisDateToDate(attrs.CASE_DATE ?? undefined),
-      problem_code: attrs.PROBLEM ?? null,
-      problem_desc: attrs.PROBLEM_DESC ?? null,
-      status_desc: attrs.STAT_DESC ?? null,
+      problem_code: attrs.PROBLEM?.trim() ?? null,
+      problem_desc: attrs.PROBLEM_DESC?.trim() ?? null,
+      status_desc: attrs.STAT_DESC?.trim() ?? null,
       case_status: attrs.CASE_STATUS ?? null,
-      lat: attrs.Y_COORD ?? null,
-      lng: attrs.X_COORD ?? null,
+      lat: coords?.lat ?? null,
+      lng: coords?.lng ?? null,
       raw: attrs as unknown as Record<string, unknown>,
     });
   }

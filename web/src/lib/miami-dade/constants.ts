@@ -24,11 +24,16 @@ export const ARCGIS = {
 
 export const SHOVELS_API_BASE = "https://api.shovels.ai/v2";
 
-export const ROOF_VIOLATION_KEYWORDS = [
-  "ROOF",
-  "REROOF",
-  "RE-ROOF",
-  "SHINGLE",
-  "TILE ROOF",
-  "LEAK",
+/**
+ * Miami-Dade GIS never labels violations with "ROOF" in PROBLEM_DESC.
+ * Roof issues appear under structure / minimum-housing maintenance categories.
+ * @see MapServer/86 groupBy on PROBLEM_DESC (verified 2026-06).
+ */
+export const ROOF_RELATED_VIOLATION_DESC_PATTERNS = [
+  "Structure Maintenance",
+  "Minimum Housing",
 ] as const;
+
+/** Default: only open enforcement cases (actionable leads). */
+export const VIOLATIONS_OPEN_ONLY =
+  process.env.VIOLATIONS_OPEN_ONLY !== "false";

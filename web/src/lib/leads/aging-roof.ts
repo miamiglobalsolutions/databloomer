@@ -42,6 +42,9 @@ function hasRecentRoof(
   return permits.some((p) => p.issue_date >= cutoff);
 }
 
+/**
+ * DataBloom Score for aging-roof leads (0–100).
+ */
 function scoreAgingLead(input: {
   roofAgeYears: number;
   assessedValue: number | null;

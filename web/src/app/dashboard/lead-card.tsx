@@ -1,4 +1,15 @@
+import Link from "next/link";
 import type { LeadRecord } from "@/lib/leads/types";
+import {
+  formatDataBloomScore,
+  getBloomZoneTier,
+} from "@/lib/leads/databloom-score";
+import {
+  displayAddress,
+  displayFolio,
+  hasFullSubscriberAccess,
+  isSubscriptionGatingEnabled,
+} from "@/lib/subscription/access";
 
 export function LeadCard({
   lead,
@@ -15,6 +26,11 @@ export function LeadCard({
     low: "bg-stone-100 text-stone-600",
   };
 
+  const bloomZone = getBloomZoneTier(lead.score);
+  const address = displayAddress(lead.address);
+  const folio = displayFolio(lead.folio);
+  const gated = isSubscriptionGatingEnabled() && !hasFullSubscriberAccess();
+
   return (
     <article
       className={`rounded-xl border border-stone-200 bg-white shadow-sm ${
@@ -22,16 +38,31 @@ export function LeadCard({
       }`}
     >
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-semibold text-stone-900">{lead.address}</h3>
+        <div className="min-w-0">
+          <h3
+            className={`font-semibold text-stone-900 ${gated ? "select-none blur-[3px]" : ""}`}
+          >
+            {address}
+          </h3>
           <p className="text-sm text-stone-500">
             {lead.zip ? `ZIP ${lead.zip}` : "Miami-Dade"}
-            {lead.folio ? ` · Folio ${lead.folio}` : ""}
+            {folio ? (
+              <span className={gated ? "select-none blur-[3px]" : ""}>
+                {" "}
+                · Folio {folio}
+              </span>
+            ) : null}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-800">
-            Score {lead.score}
+          <span
+            className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
+            style={{ backgroundColor: bloomZone.color }}
+          >
+            {formatDataBloomScore(lead.score)}
+          </span>
+          <span className="text-[10px] font-medium uppercase tracking-wide text-stone-500">
+            {bloomZone.label}
           </span>
           <span
             className={`rounded-full px-2 py-0.5 text-xs font-medium ${confidenceColors[lead.confidence]}`}
@@ -40,6 +71,15 @@ export function LeadCard({
           </span>
         </div>
       </div>
+
+      {gated && !compact && (
+        <p className="mt-3 rounded-lg bg-orange-50 px-3 py-2 text-xs text-orange-900">
+          <Link href="/subscribe" className="font-medium underline">
+            Subscribe
+          </Link>{" "}
+          to unlock full address and folio for canvassing.
+        </p>
+      )}
 
       {!compact && (
         <p className="mt-3 text-sm leading-relaxed text-stone-700">

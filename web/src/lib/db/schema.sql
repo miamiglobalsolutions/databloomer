@@ -98,3 +98,13 @@ CREATE TABLE IF NOT EXISTS ingest_runs (
   status          TEXT NOT NULL DEFAULT 'running',
   error_message   TEXT
 );
+
+CREATE TABLE IF NOT EXISTS digest_subscribers (
+  id              SERIAL PRIMARY KEY,
+  email           TEXT NOT NULL UNIQUE,
+  subscribed_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  active          BOOLEAN NOT NULL DEFAULT TRUE,
+  last_sent_at    TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_digest_subscribers_active ON digest_subscribers (active);

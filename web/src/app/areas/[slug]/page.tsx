@@ -1,0 +1,107 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { SiteHeader } from "@/components/site-header";
+import { DigestSubscribe } from "@/components/digest-subscribe";
+import { getAreaBySlug, getAreaSlugs } from "@/lib/miami-dade/areas";
+
+const appUrl =
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
+
+type PageProps = {
+  params: Promise<{ slug: string }>;
+};
+
+export async function generateStaticParams() {
+  return getAreaSlugs().map((slug) => ({ slug }));
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const area = getAreaBySlug(slug);
+  if (!area) return {};
+
+  return {
+    title: area.title,
+    description: area.description,
+    keywords: area.keywords,
+    alternates: { canonical: `${appUrl}/areas/${area.slug}` },
+    openGraph: {
+      title: area.title,
+      description: area.description,
+      url: `${appUrl}/areas/${area.slug}`,
+    },
+  };
+}
+
+export default async function AreaPage({ params }: PageProps) {
+  const { slug } = await params;
+  const area = getAreaBySlug(slug);
+  if (!area) notFound();
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: area.title,
+    description: area.description,
+    url: `${appUrl}/areas/${area.slug}`,
+    about: {
+      "@type": "Place",
+      name: area.name,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: area.name,
+        addressRegion: "FL",
+        postalCode: area.zip,
+      },
+    },
+  };
+
+  return (
+    <main className="flex-1">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <SiteHeader />
+
+      <article className="mx-auto max-w-3xl px-6 py-16">
+        <p className="mb-2 text-sm font-medium text-orange-600">
+          Miami-Dade · ZIP {area.zip}
+        </p>
+        <h1 className="text-4xl font-bold tracking-tight text-stone-900">
+          {area.name} roofing leads
+        </h1>
+        <p className="mt-6 text-lg leading-relaxed text-stone-600">{area.intro}</p>
+
+        <ul className="mt-8 space-y-3">
+          {area.highlights.map((item) => (
+            <li key={item} className="flex gap-2 text-stone-700">
+              <span className="text-orange-600">✓</span>
+              {item}
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-10 flex flex-wrap gap-4">
+          <Link
+            href={`/dashboard?type=aging_roof&zip=${area.zip}&view=map`}
+            className="rounded-lg bg-orange-600 px-6 py-3 font-medium text-white hover:bg-orange-700"
+          >
+            Bloom Zones — {area.name}
+          </Link>
+          <Link
+            href={`/dashboard?type=aging_roof&zip=${area.zip}`}
+            className="rounded-lg border border-stone-300 bg-white px-6 py-3 font-medium text-stone-800 hover:bg-stone-50"
+          >
+            View lead list
+          </Link>
+        </div>
+
+        <div className="mt-12">
+          <DigestSubscribe />
+        </div>
+      </article>
+    </main>
+  );
+}
