@@ -73,9 +73,9 @@ export default function HomePage() {
 
           <FeatureCard
 
-            title="Bloom Zones"
+            title="Interactive Map View"
 
-            body="Color-coded map pins from green to red by DataBloom Score — see where to send canvassers at a glance."
+            body="Subscribers zoom and pan color-coded Bloom Zone pins from green to red by DataBloom Score — see exactly where to send canvassers."
 
           />
 

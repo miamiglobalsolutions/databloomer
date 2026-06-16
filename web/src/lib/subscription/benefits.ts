@@ -33,10 +33,11 @@ export const SUBSCRIPTION_BENEFITS: SubscriptionBenefit[] = [
   },
   {
     id: "county-map",
-    title: "Full county Bloom Zones map",
+    title: "Interactive map view",
     description:
-      "Load every lead with coordinates across Miami-Dade (~8,000+ aging roofs) on one color-coded map.",
+      "Zoom, pan, and explore every color-coded Bloom Zone pin across Miami-Dade (~8,000+ aging roofs) with street and satellite layers.",
     status: "included",
+    highlight: true,
   },
   {
     id: "bloom-filters",
@@ -96,9 +97,9 @@ export const SUBSCRIPTION_BENEFITS: SubscriptionBenefit[] = [
   },
   {
     id: "list-map",
-    title: "List + Bloom Zones views",
+    title: "List + Map View",
     description:
-      "Switch between sortable lead cards and the color-coded canvassing map with satellite imagery.",
+      "Switch between sortable lead cards and the interactive color-coded canvassing map with satellite imagery.",
     status: "included",
   },
   {

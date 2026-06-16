@@ -4,7 +4,7 @@ import { SUBSCRIPTION_BENEFITS } from "@/lib/subscription/benefits";
 const TOP_BENEFIT_IDS = [
   "addresses",
   "folios",
-  "unlimited-access",
+  "county-map",
   "csv-export",
 ] as const;
 

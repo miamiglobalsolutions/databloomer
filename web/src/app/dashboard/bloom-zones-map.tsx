@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   CircleMarker,
@@ -64,6 +65,33 @@ function FitBounds({ leads }: { leads: LeadRecord[] }) {
   return null;
 }
 
+function LockMapInteractions({ locked }: { locked: boolean }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!locked) return;
+
+    map.dragging.disable();
+    map.touchZoom.disable();
+    map.doubleClickZoom.disable();
+    map.scrollWheelZoom.disable();
+    map.boxZoom.disable();
+    map.keyboard.disable();
+    map.zoomControl?.remove();
+
+    return () => {
+      map.dragging.enable();
+      map.touchZoom.enable();
+      map.doubleClickZoom.enable();
+      map.scrollWheelZoom.enable();
+      map.boxZoom.enable();
+      map.keyboard.enable();
+    };
+  }, [locked, map]);
+
+  return null;
+}
+
 function BasemapLayers({ basemap }: { basemap: Basemap }) {
   if (basemap === "street") {
     return (
@@ -98,6 +126,8 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   mapStyle?: BloomMapStyle;
+  /** When false, map is visible but pan/zoom/pin clicks are disabled. */
+  interactive?: boolean;
 };
 
 export function BloomZonesMap({
@@ -106,6 +136,7 @@ export function BloomZonesMap({
   selectedId,
   onSelect,
   mapStyle = "zones",
+  interactive = true,
 }: Props) {
   const [basemap, setBasemap] = useState<Basemap>("street");
 
@@ -143,8 +174,9 @@ export function BloomZonesMap({
             <button
               key={key}
               type="button"
+              disabled={!interactive}
               onClick={() => setBasemap(key)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+              className={`rounded-md px-3 py-1.5 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
                 basemap === key
                   ? "bg-stone-900 text-white"
                   : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
@@ -155,14 +187,52 @@ export function BloomZonesMap({
           ))}
         </div>
 
+        {!interactive && (
+          <div className="absolute inset-0 z-[1001] flex items-center justify-center bg-stone-900/50 p-6">
+            <div className="max-w-sm rounded-xl border border-stone-200 bg-white p-6 text-center shadow-lg">
+              <p className="text-xs font-semibold uppercase tracking-wide text-orange-600">
+                Subscribers only
+              </p>
+              <h3 className="mt-2 text-lg font-semibold text-stone-900">
+                Interactive map view
+              </h3>
+              <p className="mt-2 text-sm text-stone-600">
+                Subscribe to zoom, pan, switch basemaps, and click pins for lead
+                details on the map.
+              </p>
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                <Link
+                  href="/subscribe"
+                  className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+                >
+                  Subscribe
+                </Link>
+                <Link
+                  href="/subscribe#sign-in"
+                  className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-800 hover:bg-stone-50"
+                >
+                  Sign in
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
         <MapContainer
           center={MIAMI_CENTER}
           zoom={11}
-          className="h-[min(70vh,640px)] w-full"
-          scrollWheelZoom
+          className={`h-[min(70vh,640px)] w-full ${interactive ? "" : "pointer-events-none"}`}
+          scrollWheelZoom={interactive}
+          dragging={interactive}
+          doubleClickZoom={interactive}
+          touchZoom={interactive}
+          boxZoom={interactive}
+          keyboard={interactive}
+          zoomControl={interactive}
         >
           <BasemapLayers basemap={basemap} />
           <FitBounds leads={mappable} />
+          {!interactive && <LockMapInteractions locked />}
           {mappable.map((lead) => {
             const isSelected = lead.id === selectedId;
             const fillColor =
@@ -183,9 +253,11 @@ export function BloomZonesMap({
                   fillOpacity: isSelected ? 1 : 0.9,
                   weight: isSelected ? 3 : 1.5,
                 }}
-                eventHandlers={{
-                  click: () => onSelect(lead.id),
-                }}
+                eventHandlers={
+                  interactive
+                    ? { click: () => onSelect(lead.id) }
+                    : undefined
+                }
               >
                 <Popup>
                   <div className="min-w-[200px] text-sm">

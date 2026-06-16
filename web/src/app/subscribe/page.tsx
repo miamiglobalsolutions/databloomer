@@ -48,8 +48,9 @@ export default function SubscribePage() {
             {SUBSCRIPTION_TAGLINE}
           </p>
           <p className="mx-auto mt-4 max-w-xl text-sm text-stone-500">
-            Free preview shows Bloom Zones and scores with addresses blurred.
-            Subscribers unlock everything needed to canvass and close jobs.
+            Free preview shows the lead list and scores with addresses blurred.
+            Subscribers unlock the interactive Map View, full addresses, and
+            everything needed to canvass and close jobs.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
@@ -116,8 +117,13 @@ export default function SubscribePage() {
               </thead>
               <tbody className="divide-y divide-stone-200">
                 <CompareRow
-                  feature="Bloom Zones map"
-                  free="✓ Color-coded pins"
+                  feature="Interactive map view"
+                  free="Locked preview"
+                  paid="✓ Zoom, pan & pins"
+                />
+                <CompareRow
+                  feature="List view"
+                  free="✓ Sample leads"
                   paid="✓ Full county"
                 />
                 <CompareRow

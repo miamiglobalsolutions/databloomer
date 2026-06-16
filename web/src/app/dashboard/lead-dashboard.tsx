@@ -52,6 +52,19 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
     defaultBloomZoneTiers,
   );
   const [fullAccess, setFullAccess] = useState(true);
+  const [accessChecked, setAccessChecked] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/access/me", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data: { full?: boolean }) => {
+        setFullAccess(Boolean(data.full ?? true));
+      })
+      .catch(() => {
+        setFullAccess(true);
+      })
+      .finally(() => setAccessChecked(true));
+  }, []);
 
   const loadLeads = useCallback(async () => {
     setLoading(true);
@@ -63,8 +76,12 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
       if (zipFilter) {
         params.set("zip", zipFilter);
         params.set("limit", "500");
-      } else if (view === "map") {
+      } else if (view === "map" && fullAccess) {
         params.set("limit", "8500");
+      } else if (view === "map") {
+        params.set("diverse", "true");
+        params.set("perZip", "2");
+        params.set("limit", "60");
       } else {
         params.set("diverse", "true");
         params.set("perZip", "8");
@@ -84,11 +101,12 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
     } finally {
       setLoading(false);
     }
-  }, [type, zip, view]);
+  }, [type, zip, view, fullAccess]);
 
   useEffect(() => {
+    if (!accessChecked) return;
     loadLeads();
-  }, [loadLeads]);
+  }, [loadLeads, accessChecked]);
 
   const filteredLeads = useMemo(
     () => filterLeadsByBloomZone(leads, activeBloomTiers),
@@ -157,7 +175,12 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
             List
           </ViewButton>
           <ViewButton active={view === "map"} onClick={() => setView("map")}>
-            Bloom Zones
+            Map View
+            {!fullAccess ? (
+              <span className="ml-1 text-[10px] font-normal text-stone-400">
+                (locked)
+              </span>
+            ) : null}
           </ViewButton>
         </div>
       </div>
@@ -169,11 +192,12 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
 
       {!canExport && (
         <p className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-950">
-          Preview mode: addresses and folios are masked.{" "}
+          Preview mode: addresses and folios are masked, and the interactive map
+          is locked.{" "}
           <Link href="/subscribe" className="font-medium underline">
             Subscribe
           </Link>{" "}
-          for full canvassing data and CSV export.
+          for full canvassing data, CSV export, and Map View.
         </p>
       )}
 
@@ -213,8 +237,9 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
               </span>
               <button
                 type="button"
+                disabled={!fullAccess}
                 onClick={() => setMapStyle("zones")}
-                className={`rounded-md px-3 py-1 text-xs font-medium ${
+                className={`rounded-md px-3 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
                   mapStyle === "zones"
                     ? "bg-stone-900 text-white"
                     : "bg-white text-stone-600"
@@ -224,8 +249,9 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
               </button>
               <button
                 type="button"
+                disabled={!fullAccess}
                 onClick={() => setMapStyle("minimal")}
-                className={`rounded-md px-3 py-1 text-xs font-medium ${
+                className={`rounded-md px-3 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
                   mapStyle === "minimal"
                     ? "bg-stone-900 text-white"
                     : "bg-white text-stone-600"
@@ -240,6 +266,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
               selectedId={selectedId}
               onSelect={setSelectedId}
               mapStyle={mapStyle}
+              interactive={fullAccess}
             />
           </div>
           <aside className="space-y-4">
@@ -250,10 +277,22 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
             />
             <div>
               <h2 className="mb-2 text-sm font-semibold text-stone-700">
-                {selectedLead ? "Selected lead" : "Click a pin for details"}
+                {selectedLead
+                  ? "Selected lead"
+                  : fullAccess
+                    ? "Click a pin for details"
+                    : "Map View — subscribers only"}
               </h2>
-              {selectedLead ? (
+              {selectedLead && fullAccess ? (
                 <LeadCard lead={selectedLead} type={type} fullAccess={fullAccess} />
+              ) : !fullAccess ? (
+                <p className="rounded-xl border border-dashed border-orange-200 bg-orange-50 p-6 text-sm text-orange-950">
+                  Subscribe to click pins, zoom in, and explore leads on the
+                  interactive map.{" "}
+                  <Link href="/subscribe" className="font-medium underline">
+                    See plans
+                  </Link>
+                </p>
               ) : (
                 <p className="rounded-xl border border-dashed border-stone-300 p-6 text-sm text-stone-500">
                   Click a color-coded pin to see lead details here.

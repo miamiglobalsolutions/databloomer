@@ -72,7 +72,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           <div className="mb-6 rounded-xl border border-orange-200 bg-orange-50 px-5 py-4 text-sm text-orange-950">
             <strong>Aging roofs are your bread and butter.</strong> Leads in the
             deploy canvassers to the highest-opportunity neighborhoods. Use{" "}
-            <strong>Bloom Zones</strong> to see color-coded pins by{" "}
+            <strong>Map View</strong> (subscribers) to see color-coded pins by{" "}
             <strong>DataBloom Score</strong>. High confidence = recorded roof
             permit; medium = estimated from year built.
           </div>
