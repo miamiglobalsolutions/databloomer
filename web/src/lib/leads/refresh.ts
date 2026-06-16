@@ -161,11 +161,85 @@ export async function refreshViolationLeads(): Promise<number> {
   return upserted;
 }
 
+export async function refreshConstructionLeads(): Promise<number> {
+  const permits = await query<{
+    id: string;
+    address: string | null;
+    permit_number: string | null;
+    process_number: string | null;
+    permit_type: string;
+    permit_desc: string | null;
+    contractor_name: string | null;
+    issue_date: Date;
+    lat: number | null;
+    lng: number | null;
+  }>(
+    `SELECT cp.id, cp.address, cp.permit_number, cp.process_number, cp.permit_type,
+            cp.permit_desc, cp.contractor_name, cp.issue_date, p.lat, p.lng
+     FROM construction_permits cp
+     LEFT JOIN properties p ON p.folio = cp.folio`,
+  );
+
+  let upserted = 0;
+  for (const p of permits.rows) {
+    if (!p.address) continue;
+    const leadId = `construction-${p.id}`;
+
+    const scoreByType: Record<string, number> = {
+      "07": 78,
+      "01": 70,
+      "02": 68,
+    };
+    const score = scoreByType[p.permit_type] ?? 65;
+
+    await query(
+      `INSERT INTO leads (
+        id, lead_type, folio, address, zip, score, confidence,
+        roof_age_years, last_roof_date, year_built, assessed_value,
+        violation_case, violation_desc, signal_summary, lat, lng, computed_at
+      ) VALUES (
+        $1, 'new_construction', NULL, $2, NULL, $3, 'high',
+        NULL, NULL, NULL, NULL,
+        $4, $5, $6, $7, $8, NOW()
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        address = EXCLUDED.address,
+        score = EXCLUDED.score,
+        violation_case = EXCLUDED.violation_case,
+        violation_desc = EXCLUDED.violation_desc,
+        signal_summary = EXCLUDED.signal_summary,
+        lat = EXCLUDED.lat,
+        lng = EXCLUDED.lng,
+        computed_at = NOW()`,
+      [
+        leadId,
+        p.address,
+        score,
+        p.permit_number ?? p.process_number ?? p.permit_type,
+        p.contractor_name,
+        `Recent ${
+          p.permit_type === "07"
+            ? "new construction"
+            : p.permit_type === "01"
+              ? "attached addition"
+              : "detached addition"
+        } permit${p.contractor_name ? ` · Builder: ${p.contractor_name}` : ""}${p.permit_desc ? ` · ${p.permit_desc}` : ""}`,
+        p.lat,
+        p.lng,
+      ],
+    );
+    upserted += 1;
+  }
+  return upserted;
+}
+
 export async function refreshAllLeads(): Promise<{
   aging_roof: number;
   code_violation: number;
+  new_construction: number;
 }> {
   const aging_roof = await refreshAgingRoofLeads();
   const code_violation = await refreshViolationLeads();
-  return { aging_roof, code_violation };
+  const new_construction = await refreshConstructionLeads();
+  return { aging_roof, code_violation, new_construction };
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SubscriptionBenefitsBar } from "@/components/subscription-benefits-bar";
 import { LeadDashboard } from "./lead-dashboard";
 
 type PageProps = {
@@ -7,7 +8,12 @@ type PageProps = {
 
 export default async function DashboardPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const type = params.type === "code_violation" ? "code_violation" : "aging_roof";
+  const type =
+    params.type === "code_violation"
+      ? "code_violation"
+      : params.type === "new_construction"
+        ? "new_construction"
+        : "aging_roof";
   const zip = params.zip ?? "";
   const initialView = params.view === "map" ? "map" : "list";
 
@@ -49,8 +55,14 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               active={type === "code_violation"}
               label="Violations"
             />
+            <TabLink
+              href="/dashboard?type=new_construction"
+              active={type === "new_construction"}
+              label="New builds & additions"
+            />
           </nav>
         </div>
+        <SubscriptionBenefitsBar />
       </header>
 
       <div className="mx-auto max-w-7xl px-6 py-8">
@@ -70,6 +82,14 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             violations as &ldquo;roof&rdquo; in its public GIS — roof problems usually
             appear as structure or minimum-housing maintenance cases. These are active
             (&ldquo;Open&rdquo;) enforcement leads worth a door knock or call.
+          </div>
+        )}
+
+        {type === "new_construction" && (
+          <div className="mb-6 rounded-xl border border-sky-200 bg-sky-50 px-5 py-4 text-sm text-sky-950">
+            <strong>Fresh builder activity.</strong> These permits show recent
+            new construction and additions (APPTYPE 07/01/02) so your team can
+            target active builders and neighborhoods with current project volume.
           </div>
         )}
 

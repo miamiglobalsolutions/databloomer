@@ -94,7 +94,7 @@ function BasemapLayers({ basemap }: { basemap: Basemap }) {
 
 type Props = {
   leads: LeadRecord[];
-  type: "aging_roof" | "code_violation";
+  type: "aging_roof" | "code_violation" | "new_construction";
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   mapStyle?: BloomMapStyle;

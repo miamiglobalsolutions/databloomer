@@ -32,6 +32,28 @@ CREATE TABLE IF NOT EXISTS roof_permits (
 CREATE INDEX IF NOT EXISTS idx_roof_permits_folio ON roof_permits (folio);
 CREATE INDEX IF NOT EXISTS idx_roof_permits_issue_date ON roof_permits (issue_date);
 
+CREATE TABLE IF NOT EXISTS construction_permits (
+  id                      TEXT PRIMARY KEY,
+  folio                   TEXT REFERENCES properties (folio) ON DELETE SET NULL,
+  permit_number           TEXT,
+  process_number          TEXT,
+  address                 TEXT,
+  permit_type             TEXT NOT NULL,
+  permit_desc             TEXT,
+  proposed_use            TEXT,
+  contractor_name         TEXT,
+  contractor_number       TEXT,
+  residential_commercial  TEXT,
+  issue_date              DATE NOT NULL,
+  status                  TEXT,
+  source                  TEXT NOT NULL DEFAULT 'arcgis',
+  raw_json                JSONB,
+  created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_construction_permits_folio ON construction_permits (folio);
+CREATE INDEX IF NOT EXISTS idx_construction_permits_issue_date ON construction_permits (issue_date);
+
 CREATE TABLE IF NOT EXISTS code_violations (
   id              TEXT PRIMARY KEY,
   folio           TEXT,
@@ -53,9 +75,15 @@ CREATE INDEX IF NOT EXISTS idx_violations_folio ON code_violations (folio);
 CREATE INDEX IF NOT EXISTS idx_violations_case_date ON code_violations (case_date);
 
 DO $$ BEGIN
-  CREATE TYPE lead_type AS ENUM ('aging_roof', 'code_violation');
+  CREATE TYPE lead_type AS ENUM ('aging_roof', 'code_violation', 'new_construction');
 EXCEPTION
   WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  ALTER TYPE lead_type ADD VALUE IF NOT EXISTS 'new_construction';
+EXCEPTION
+  WHEN undefined_object THEN NULL;
 END $$;
 
 DO $$ BEGIN

@@ -35,7 +35,7 @@ const LeadMap = dynamic(
 type ViewMode = "list" | "map";
 
 type Props = {
-  type: "aging_roof" | "code_violation";
+  type: "aging_roof" | "code_violation" | "new_construction";
   initialZip: string;
   initialView?: ViewMode;
 };

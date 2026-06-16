@@ -12,6 +12,15 @@ export const ROOF_PERMIT_TYPE_LABELS: Record<string, string> = {
   "20": "Roof Recovery",
 };
 
+/** Miami-Dade application types for new construction and additions */
+export const CONSTRUCTION_PERMIT_TYPE_CODES = ["07", "01", "02"] as const;
+
+export const CONSTRUCTION_PERMIT_TYPE_LABELS: Record<string, string> = {
+  "07": "New construction",
+  "01": "Addition (attached)",
+  "02": "Addition (detached)",
+};
+
 export const ARCGIS = {
   buildingPermits:
     "https://gisweb.miamidade.gov/arcgis/rest/services/MD_LandInformation/MapServer/1",

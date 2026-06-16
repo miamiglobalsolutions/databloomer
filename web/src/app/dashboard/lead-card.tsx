@@ -17,7 +17,7 @@ export function LeadCard({
   compact,
 }: {
   lead: LeadRecord;
-  type: "aging_roof" | "code_violation";
+  type: "aging_roof" | "code_violation" | "new_construction";
   compact?: boolean;
 }) {
   const confidenceColors = {
@@ -120,6 +120,13 @@ export function LeadCard({
         <p className="mt-3 rounded-lg bg-stone-50 px-3 py-2 text-xs text-stone-700">
           {lead.violation_desc}
           {lead.violation_case ? ` (Case ${lead.violation_case})` : ""}
+        </p>
+      )}
+
+      {type === "new_construction" && !compact && (
+        <p className="mt-3 rounded-lg bg-sky-50 px-3 py-2 text-xs text-sky-900">
+          {lead.violation_desc ? `Builder: ${lead.violation_desc}` : "Builder not listed"}
+          {lead.violation_case ? ` · Permit ${lead.violation_case}` : ""}
         </p>
       )}
     </article>

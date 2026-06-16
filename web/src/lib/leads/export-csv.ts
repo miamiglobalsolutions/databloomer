@@ -15,7 +15,7 @@ function escapeCsv(value: string | number | null | undefined): string {
 
 export function leadsToCsv(
   leads: LeadRecord[],
-  leadType: "aging_roof" | "code_violation",
+  leadType: "aging_roof" | "code_violation" | "new_construction",
 ): string {
   const headers =
     leadType === "aging_roof"
@@ -33,7 +33,8 @@ export function leadsToCsv(
           "Lng",
           "Summary",
         ]
-      : [
+      : leadType === "code_violation"
+        ? [
           "Address",
           "ZIP",
           "Folio",
@@ -42,6 +43,19 @@ export function leadsToCsv(
           "Confidence",
           "Violation Case",
           "Violation Description",
+          "Lat",
+          "Lng",
+          "Summary",
+        ]
+        : [
+          "Address",
+          "ZIP",
+          "Folio",
+          "DataBloom Score",
+          "Bloom Zone",
+          "Confidence",
+          "Permit / Process",
+          "Builder",
           "Lat",
           "Lng",
           "Summary",
@@ -65,7 +79,21 @@ export function leadsToCsv(
             lead.lng,
             lead.signal_summary,
           ]
-        : [
+        : leadType === "code_violation"
+          ? [
+            hasFullSubscriberAccess() ? lead.address : displayAddress(lead.address),
+            lead.zip,
+            hasFullSubscriberAccess() ? lead.folio : displayFolio(lead.folio),
+            lead.score,
+            zone,
+            lead.confidence,
+            lead.violation_case,
+            lead.violation_desc,
+            lead.lat,
+            lead.lng,
+            lead.signal_summary,
+          ]
+          : [
             hasFullSubscriberAccess() ? lead.address : displayAddress(lead.address),
             lead.zip,
             hasFullSubscriberAccess() ? lead.folio : displayFolio(lead.folio),
@@ -86,7 +114,7 @@ export function leadsToCsv(
 
 export function downloadLeadsCsv(
   leads: LeadRecord[],
-  leadType: "aging_roof" | "code_violation",
+  leadType: "aging_roof" | "code_violation" | "new_construction",
   filename?: string,
 ): void {
   if (!hasFullSubscriberAccess()) {

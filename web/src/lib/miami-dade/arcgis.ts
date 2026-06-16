@@ -1,5 +1,6 @@
 import {
   ARCGIS,
+  CONSTRUCTION_PERMIT_TYPE_CODES,
   ROOF_PERMIT_TYPE_CODES,
   ROOF_RELATED_VIOLATION_DESC_PATTERNS,
   VIOLATIONS_OPEN_ONLY,
@@ -189,6 +190,23 @@ export type ParsedRoofPermit = {
   raw: Record<string, unknown>;
 };
 
+export type ParsedConstructionPermit = {
+  id: string;
+  folio: string | null;
+  permit_number: string | null;
+  process_number: string | null;
+  address: string | null;
+  permit_type: string;
+  permit_desc: string | null;
+  proposed_use: string | null;
+  contractor_name: string | null;
+  contractor_number: string | null;
+  residential_or_commercial: string | null;
+  issue_date: Date;
+  status: string | null;
+  raw: Record<string, unknown>;
+};
+
 export type ParsedViolation = {
   id: string;
   folio: string | null;
@@ -248,6 +266,53 @@ export async function fetchRoofPermits(options?: {
       process_number: attrs.PROCNUM ?? null,
       address: attrs.ADDRESS?.trim() ?? null,
       permit_type: attrs.APPTYPE,
+      issue_date: issueDate,
+      status: attrs.BPSTATUS ?? null,
+      raw: attrs as unknown as Record<string, unknown>,
+    });
+  }
+
+  return parsed;
+}
+
+export async function fetchConstructionPermits(options?: {
+  maxRecords?: number;
+}): Promise<ParsedConstructionPermit[]> {
+  const appTypes = CONSTRUCTION_PERMIT_TYPE_CODES.map((c) => `'${c}'`).join(",");
+  const features = await arcgisQueryAll<PermitAttributes & Record<string, unknown>>(
+    ARCGIS.buildingPermits,
+    {
+      where: `APPTYPE IN (${appTypes}) AND TYPE = 'BLDG'`,
+      outFields:
+        "OBJECTID,FOLIO,ID,PROCNUM,ADDRESS,APPTYPE,DESC1,PROPUSE,CONTRNAME,CONTRNUM,RESCOMM,ISSUDATE,BPSTATUS",
+      returnGeometry: "false",
+      orderByFields: "ISSUDATE DESC",
+      f: "json",
+    },
+    { pageSize: 1000, maxRecords: options?.maxRecords ?? 10_000 },
+  );
+
+  const parsed: ParsedConstructionPermit[] = [];
+  for (const feature of features) {
+    const attrs = feature.attributes;
+    const issueDate = arcgisDateToDate(attrs.ISSUDATE);
+    if (!issueDate || !attrs.APPTYPE) continue;
+
+    parsed.push({
+      id: `arcgis-construction-${attrs.OBJECTID}`,
+      folio: normalizeFolio(attrs.FOLIO),
+      permit_number: attrs.ID != null ? String(attrs.ID) : null,
+      process_number: attrs.PROCNUM ?? null,
+      address: attrs.ADDRESS?.trim() ?? null,
+      permit_type: attrs.APPTYPE,
+      permit_desc: typeof attrs.DESC1 === "string" ? attrs.DESC1.trim() : null,
+      proposed_use: typeof attrs.PROPUSE === "string" ? attrs.PROPUSE.trim() : null,
+      contractor_name:
+        typeof attrs.CONTRNAME === "string" ? attrs.CONTRNAME.trim() : null,
+      contractor_number:
+        typeof attrs.CONTRNUM === "string" ? attrs.CONTRNUM.trim() : null,
+      residential_or_commercial:
+        typeof attrs.RESCOMM === "string" ? attrs.RESCOMM.trim() : null,
       issue_date: issueDate,
       status: attrs.BPSTATUS ?? null,
       raw: attrs as unknown as Record<string, unknown>,

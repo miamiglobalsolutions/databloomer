@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { SubscriptionBenefitsBar } from "./subscription-benefits-bar";
 
 type Props = {
   active?: "home" | "about" | "subscribe" | "dashboard";
+  showBenefitsBar?: boolean;
 };
 
-export function SiteHeader({ active }: Props) {
+export function SiteHeader({ active, showBenefitsBar = active !== "subscribe" }: Props) {
   return (
     <header className="border-b border-stone-200 bg-white">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
@@ -33,6 +35,7 @@ export function SiteHeader({ active }: Props) {
           </Link>
         </nav>
       </div>
+      {showBenefitsBar && <SubscriptionBenefitsBar />}
     </header>
   );
 }

@@ -1,9 +1,11 @@
 import type { PoolClient } from "pg";
 import {
   fetchAgingPropertiesByZip,
+  fetchConstructionPermits,
   fetchPropertiesByYearBuilt,
   fetchRoofPermits,
   fetchRoofViolations,
+  type ParsedConstructionPermit,
   type ParsedProperty,
   type ParsedRoofPermit,
   type ParsedViolation,
@@ -104,6 +106,60 @@ async function upsertPermit(permit: ParsedRoofPermit, source: string) {
   );
 }
 
+async function upsertConstructionPermit(
+  permit: ParsedConstructionPermit,
+  source: string,
+) {
+  if (permit.folio) {
+    await upsertProperty({
+      folio: permit.folio,
+      address: permit.address ?? "Unknown address",
+      city: "Miami",
+      zip: null,
+      year_built: null,
+      assessed_value: null,
+      lat: null,
+      lng: null,
+    });
+  }
+
+  await query(
+    `INSERT INTO construction_permits (
+      id, folio, permit_number, process_number, address, permit_type, permit_desc,
+      proposed_use, contractor_name, contractor_number, residential_commercial,
+      issue_date, status, source, raw_json
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7,
+      $8, $9, $10, $11,
+      $12, $13, $14, $15
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      folio = COALESCE(EXCLUDED.folio, construction_permits.folio),
+      permit_desc = EXCLUDED.permit_desc,
+      contractor_name = EXCLUDED.contractor_name,
+      issue_date = EXCLUDED.issue_date,
+      status = EXCLUDED.status,
+      raw_json = EXCLUDED.raw_json`,
+    [
+      permit.id,
+      permit.folio,
+      permit.permit_number,
+      permit.process_number,
+      permit.address,
+      permit.permit_type,
+      permit.permit_desc,
+      permit.proposed_use,
+      permit.contractor_name,
+      permit.contractor_number,
+      permit.residential_or_commercial,
+      permit.issue_date.toISOString().slice(0, 10),
+      permit.status,
+      source,
+      JSON.stringify(permit.raw),
+    ],
+  );
+}
+
 async function upsertViolation(violation: ParsedViolation) {
   await query(
     `INSERT INTO code_violations (
@@ -134,6 +190,7 @@ async function upsertViolation(violation: ParsedViolation) {
 export type IngestSummary = {
   properties: number;
   permits: number;
+  constructionPermits: number;
   violations: number;
   shovelsPermits: number;
   shovelsConfigured: boolean;
@@ -142,6 +199,7 @@ export type IngestSummary = {
 export async function clearAllData(): Promise<void> {
   await query("DELETE FROM leads");
   await query("DELETE FROM code_violations");
+  await query("DELETE FROM construction_permits");
   await query("DELETE FROM roof_permits");
   await query("DELETE FROM properties");
 }
@@ -159,6 +217,7 @@ export async function ingestMiamiDade(options?: {
   const runId = await startRun("miami-dade");
   let properties = 0;
   let permits = 0;
+  let constructionPermits = 0;
   let violations = 0;
   let shovelsPermits = 0;
 
@@ -205,6 +264,13 @@ export async function ingestMiamiDade(options?: {
     for (const permit of permitRows) {
       await upsertPermit(permit, "arcgis");
       permits += 1;
+    }
+
+    log("Fetching new construction and addition permits (APPTYPE 07/01/02)…");
+    const constructionRows = await fetchConstructionPermits();
+    for (const permit of constructionRows) {
+      await upsertConstructionPermit(permit, "arcgis");
+      constructionPermits += 1;
     }
 
     log("Fetching roof-related code violations…");
@@ -262,13 +328,14 @@ export async function ingestMiamiDade(options?: {
 
     await finishRun(
       runId,
-      properties + permits + violations + shovelsPermits,
-      properties + permits + violations + shovelsPermits,
+      properties + permits + constructionPermits + violations + shovelsPermits,
+      properties + permits + constructionPermits + violations + shovelsPermits,
     );
 
     return {
       properties,
       permits,
+      constructionPermits,
       violations,
       shovelsPermits,
       shovelsConfigured: shovelsConfigured(),
@@ -377,6 +444,7 @@ export async function seedSampleData(): Promise<IngestSummary> {
   return {
     properties: samples.length,
     permits: samples.reduce((n, s) => n + s.permits.length, 0),
+    constructionPermits: 0,
     violations: 1,
     shovelsPermits: 0,
     shovelsConfigured: shovelsConfigured(),

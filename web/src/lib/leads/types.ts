@@ -1,4 +1,4 @@
-export type LeadType = "aging_roof" | "code_violation";
+export type LeadType = "aging_roof" | "code_violation" | "new_construction";
 export type LeadConfidence = "high" | "medium" | "low";
 
 export type LeadRecord = {
