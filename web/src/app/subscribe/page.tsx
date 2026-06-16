@@ -63,11 +63,11 @@ export default function SubscribePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-4xl px-6 py-10">
+      <section id="sign-in" className="mx-auto max-w-4xl scroll-mt-24 px-6 py-10">
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-xl border border-stone-200 bg-white p-5">
             <h3 className="text-lg font-semibold text-stone-900">
-              Already subscribed?
+              Already subscribed? Sign in
             </h3>
             <p className="mt-1 text-sm text-stone-600">
               Enter the email you used at Stripe checkout to unlock this browser.

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AccessAuthControls } from "@/components/access-auth-controls";
 import { SubscriptionBenefitsBar } from "@/components/subscription-benefits-bar";
 import { LeadDashboard } from "./lead-dashboard";
 
@@ -60,6 +61,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               active={type === "new_construction"}
               label="New builds & additions"
             />
+            <AccessAuthControls />
           </nav>
         </div>
         <SubscriptionBenefitsBar />

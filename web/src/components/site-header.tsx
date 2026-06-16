@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AccessAuthControls } from "./access-auth-controls";
 import { SubscriptionBenefitsBar } from "./subscription-benefits-bar";
 
 type Props = {
@@ -33,6 +34,7 @@ export function SiteHeader({ active, showBenefitsBar = active !== "subscribe" }:
           >
             Open dashboard
           </Link>
+          <AccessAuthControls compact />
         </nav>
       </div>
       {showBenefitsBar && <SubscriptionBenefitsBar />}
