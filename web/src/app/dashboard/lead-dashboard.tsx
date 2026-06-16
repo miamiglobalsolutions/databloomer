@@ -12,7 +12,6 @@ import type { BloomZoneTier } from "@/lib/leads/databloom-score";
 import { filterLeadsByBloomZone } from "@/lib/leads/databloom-score";
 import { computeTopBloomZips } from "@/lib/leads/bloom-zips";
 import { downloadLeadsCsv } from "@/lib/leads/export-csv";
-import { hasFullSubscriberAccess } from "@/lib/subscription/access";
 import type { LeadRecord } from "@/lib/leads/types";
 import { AREA_ZIP_SHORTCUTS } from "@/lib/miami-dade/areas";
 import { normalizeZipInput } from "@/lib/miami-dade/zips";
@@ -52,6 +51,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
   const [activeBloomTiers, setActiveBloomTiers] = useState<Set<BloomZoneTier>>(
     defaultBloomZoneTiers,
   );
+  const [fullAccess, setFullAccess] = useState(true);
 
   const loadLeads = useCallback(async () => {
     setLoading(true);
@@ -76,6 +76,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
       if (!res.ok) throw new Error(data.error ?? "Failed to load leads");
       setLeads(data.leads ?? []);
       setTotalLeads(typeof data.total === "number" ? data.total : null);
+      setFullAccess(Boolean(data.access?.full ?? true));
       setSelectedId(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load leads");
@@ -100,7 +101,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
     () => computeTopBloomZips(filteredLeads, 5),
     [filteredLeads],
   );
-  const canExport = hasFullSubscriberAccess();
+  const canExport = fullAccess;
 
   return (
     <div className="space-y-6">
@@ -128,7 +129,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
           <button
             type="button"
             disabled={filteredLeads.length === 0 || !canExport}
-            onClick={() => downloadLeadsCsv(filteredLeads, type)}
+            onClick={() => downloadLeadsCsv(filteredLeads, type, fullAccess)}
             className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-800 hover:bg-stone-50 disabled:opacity-50"
             title={
               canExport
@@ -252,7 +253,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
                 {selectedLead ? "Selected lead" : "Click a pin for details"}
               </h2>
               {selectedLead ? (
-                <LeadCard lead={selectedLead} type={type} />
+                <LeadCard lead={selectedLead} type={type} fullAccess={fullAccess} />
               ) : (
                 <p className="rounded-xl border border-dashed border-stone-300 p-6 text-sm text-stone-500">
                   Click a color-coded pin to see lead details here.
@@ -266,7 +267,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
         <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="grid gap-4 lg:grid-cols-2">
             {filteredLeads.map((lead) => (
-              <LeadCard key={lead.id} lead={lead} type={type} />
+              <LeadCard key={lead.id} lead={lead} type={type} fullAccess={fullAccess} />
             ))}
           </div>
           <aside className="space-y-4">

@@ -1,16 +1,20 @@
 /**
- * Subscription gating — off by default until billing is live.
- * Set NEXT_PUBLIC_SUBSCRIPTION_GATING=true to blur addresses/folios for preview users.
- * Set NEXT_PUBLIC_PREVIEW_AS_SUBSCRIBER=true to test the full subscriber experience.
+ * Subscription gating helpers.
+ * API routes enforce masking server-side based on session access level.
  */
 
+export type AccessLevel = "preview" | "subscriber" | "admin";
+
 export function isSubscriptionGatingEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_SUBSCRIPTION_GATING === "true";
+  return (
+    process.env.SUBSCRIPTION_GATING === "true" ||
+    process.env.NEXT_PUBLIC_SUBSCRIPTION_GATING === "true"
+  );
 }
 
-export function hasFullSubscriberAccess(): boolean {
+export function hasFullAccess(level: AccessLevel): boolean {
   if (!isSubscriptionGatingEnabled()) return true;
-  return process.env.NEXT_PUBLIC_PREVIEW_AS_SUBSCRIBER === "true";
+  return level === "subscriber" || level === "admin";
 }
 
 export function maskAddress(address: string): string {
@@ -26,10 +30,10 @@ export function maskFolio(folio: string): string {
 }
 
 export function displayAddress(address: string): string {
-  return hasFullSubscriberAccess() ? address : maskAddress(address);
+  return address;
 }
 
 export function displayFolio(folio: string | null | undefined): string | null {
   if (!folio) return null;
-  return hasFullSubscriberAccess() ? folio : maskFolio(folio);
+  return folio;
 }

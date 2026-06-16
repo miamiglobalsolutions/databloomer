@@ -4,21 +4,18 @@ import {
   formatDataBloomScore,
   getBloomZoneTier,
 } from "@/lib/leads/databloom-score";
-import {
-  displayAddress,
-  displayFolio,
-  hasFullSubscriberAccess,
-  isSubscriptionGatingEnabled,
-} from "@/lib/subscription/access";
+import { displayAddress, displayFolio } from "@/lib/subscription/access";
 
 export function LeadCard({
   lead,
   type,
   compact,
+  fullAccess,
 }: {
   lead: LeadRecord;
   type: "aging_roof" | "code_violation" | "new_construction";
   compact?: boolean;
+  fullAccess: boolean;
 }) {
   const confidenceColors = {
     high: "bg-emerald-100 text-emerald-800",
@@ -29,7 +26,7 @@ export function LeadCard({
   const bloomZone = getBloomZoneTier(lead.score);
   const address = displayAddress(lead.address);
   const folio = displayFolio(lead.folio);
-  const gated = isSubscriptionGatingEnabled() && !hasFullSubscriberAccess();
+  const gated = !fullAccess;
 
   return (
     <article

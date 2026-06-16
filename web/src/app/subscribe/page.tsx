@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { AccessLoginForm } from "@/components/access-login-form";
+import { StripeCheckoutButton } from "@/components/stripe-checkout-button";
+import { SubscriberEmailLoginForm } from "@/components/subscriber-email-login-form";
 import { DigestSubscribe } from "@/components/digest-subscribe";
 import {
   SUBSCRIPTION_BENEFITS,
@@ -55,13 +58,29 @@ export default function SubscribePage() {
             >
               Try free preview
             </Link>
-            <a
-              href="mailto:hello@databloomer.com?subject=DataBloomer%20Subscription"
-              className="rounded-lg bg-orange-600 px-6 py-3 font-medium text-white hover:bg-orange-700"
-            >
-              Request subscription access
-            </a>
+            <StripeCheckoutButton />
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-4xl px-6 py-10">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-xl border border-stone-200 bg-white p-5">
+            <h3 className="text-lg font-semibold text-stone-900">
+              Already subscribed?
+            </h3>
+            <p className="mt-1 text-sm text-stone-600">
+              Enter the email you used at Stripe checkout to unlock this browser.
+            </p>
+            <div className="mt-4">
+              <SubscriberEmailLoginForm />
+            </div>
+          </div>
+          <AccessLoginForm
+            target="subscriber"
+            title="Have an access code?"
+            subtitle="Use a manual subscriber code if we granted access directly."
+          />
         </div>
       </section>
 
@@ -178,6 +197,9 @@ export default function SubscribePage() {
           >
             hello@databloomer.com
           </a>
+        </p>
+        <p className="mt-2 text-center text-xs text-stone-400">
+          Admin only: <Link href="/admin" className="underline">admin login</Link>
         </p>
       </section>
     </main>

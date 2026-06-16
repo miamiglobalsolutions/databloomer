@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import type { LeadRecord } from "@/lib/leads/types";
 import { normalizeZipInput } from "@/lib/miami-dade/zips";
 import { query } from "@/lib/db/client";
+import { isSubscriptionGatingEnabled, maskAddress, maskFolio } from "@/lib/subscription/access";
+import { getAccessForRequest } from "@/lib/subscription/session";
 
 const ALLOWED_TYPES = new Set(["aging_roof", "code_violation", "new_construction"]);
 
@@ -26,6 +28,7 @@ export async function GET(request: Request) {
   const limit = Math.min(Number(searchParams.get("limit") ?? 50), 8500);
 
   try {
+    const access = await getAccessForRequest(request);
     let result;
 
     if (diverse && !zip) {
@@ -68,12 +71,21 @@ export async function GET(request: Request) {
       );
     }
 
+    const leads = isSubscriptionGatingEnabled() && !access.full
+      ? result.rows.map((row) => ({
+          ...row,
+          address: maskAddress(row.address),
+          folio: row.folio ? maskFolio(row.folio) : null,
+        }))
+      : result.rows;
+
     return NextResponse.json({
-      leads: result.rows,
+      leads,
       count: result.rows.length,
       total: await getTotalCount(type),
       type,
       diverse: diverse && !zip,
+      access,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

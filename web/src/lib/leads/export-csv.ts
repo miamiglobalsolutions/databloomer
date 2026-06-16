@@ -1,10 +1,6 @@
 import type { LeadRecord } from "@/lib/leads/types";
 import { getBloomZoneTier } from "@/lib/leads/databloom-score";
-import {
-  displayAddress,
-  displayFolio,
-  hasFullSubscriberAccess,
-} from "@/lib/subscription/access";
+import { displayAddress, displayFolio } from "@/lib/subscription/access";
 
 function escapeCsv(value: string | number | null | undefined): string {
   if (value == null) return "";
@@ -66,9 +62,9 @@ export function leadsToCsv(
     const cells =
       leadType === "aging_roof"
         ? [
-            hasFullSubscriberAccess() ? lead.address : displayAddress(lead.address),
+            displayAddress(lead.address),
             lead.zip,
-            hasFullSubscriberAccess() ? lead.folio : displayFolio(lead.folio),
+            displayFolio(lead.folio),
             lead.score,
             zone,
             lead.confidence,
@@ -81,9 +77,9 @@ export function leadsToCsv(
           ]
         : leadType === "code_violation"
           ? [
-            hasFullSubscriberAccess() ? lead.address : displayAddress(lead.address),
+            displayAddress(lead.address),
             lead.zip,
-            hasFullSubscriberAccess() ? lead.folio : displayFolio(lead.folio),
+            displayFolio(lead.folio),
             lead.score,
             zone,
             lead.confidence,
@@ -94,9 +90,9 @@ export function leadsToCsv(
             lead.signal_summary,
           ]
           : [
-            hasFullSubscriberAccess() ? lead.address : displayAddress(lead.address),
+            displayAddress(lead.address),
             lead.zip,
-            hasFullSubscriberAccess() ? lead.folio : displayFolio(lead.folio),
+            displayFolio(lead.folio),
             lead.score,
             zone,
             lead.confidence,
@@ -115,9 +111,10 @@ export function leadsToCsv(
 export function downloadLeadsCsv(
   leads: LeadRecord[],
   leadType: "aging_roof" | "code_violation" | "new_construction",
+  fullAccess: boolean,
   filename?: string,
 ): void {
-  if (!hasFullSubscriberAccess()) {
+  if (!fullAccess) {
     window.alert(
       "CSV export with full addresses and folios is available to subscribers. Visit /subscribe to learn more.",
     );
