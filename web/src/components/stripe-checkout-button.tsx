@@ -2,6 +2,20 @@
 
 import { useState } from "react";
 
+async function readJsonResponse(res: Response): Promise<Record<string, unknown>> {
+  const text = await res.text();
+  if (!text.trim()) {
+    throw new Error(
+      `Checkout failed (${res.status}). Server returned an empty response — check Vercel env vars and redeploy.`,
+    );
+  }
+  try {
+    return JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    throw new Error(`Checkout failed (${res.status}): ${text.slice(0, 200)}`);
+  }
+}
+
 export function StripeCheckoutButton() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -11,11 +25,15 @@ export function StripeCheckoutButton() {
     setError(null);
     try {
       const res = await fetch("/api/stripe/checkout", { method: "POST" });
-      const data = await res.json();
+      const data = await readJsonResponse(res);
       if (!res.ok) {
-        throw new Error(data.error ?? "Could not start checkout.");
+        const hint =
+          typeof data.hint === "string" ? ` ${data.hint}` : "";
+        throw new Error(
+          `${String(data.error ?? "Could not start checkout.")}${hint}`,
+        );
       }
-      if (!data.url) {
+      if (typeof data.url !== "string" || !data.url) {
         throw new Error("Stripe checkout URL missing.");
       }
       window.location.href = data.url;
