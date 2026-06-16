@@ -5,9 +5,11 @@ import type { LeadRecord } from "@/lib/leads/types";
 import { normalizeZipInput } from "@/lib/miami-dade/zips";
 import { query } from "@/lib/db/client";
 
+const ALLOWED_TYPES = new Set(["aging_roof", "code_violation", "new_construction"]);
+
 async function getTotalCount(type: string): Promise<number> {
   const result = await query<{ n: number }>(
-    `SELECT COUNT(*)::int AS n FROM leads WHERE lead_type = $1`,
+    `SELECT COUNT(*)::int AS n FROM leads WHERE lead_type::text = $1`,
     [type],
   );
   return result.rows[0]?.n ?? 0;
@@ -15,7 +17,8 @@ async function getTotalCount(type: string): Promise<number> {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get("type") ?? "aging_roof";
+  const requestedType = searchParams.get("type") ?? "aging_roof";
+  const type = ALLOWED_TYPES.has(requestedType) ? requestedType : "aging_roof";
   const zipRaw = searchParams.get("zip");
   const zip = zipRaw ? normalizeZipInput(zipRaw) : null;
   const diverse = searchParams.get("diverse") === "true";
@@ -37,7 +40,7 @@ export async function GET(request: Request) {
                ORDER BY score DESC, computed_at DESC
              ) AS zip_rank
            FROM leads
-           WHERE lead_type = $1
+           WHERE lead_type::text = $1
          ) ranked
          WHERE zip_rank <= $2
          ORDER BY score DESC, computed_at DESC
@@ -45,7 +48,7 @@ export async function GET(request: Request) {
         [type, perZip, limit],
       );
     } else {
-      const clauses = ["lead_type = $1"];
+      const clauses = ["lead_type::text = $1"];
       const params: unknown[] = [type];
 
       if (zip) {
