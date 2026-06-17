@@ -40,17 +40,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.8,
     },
-    {
-      url: `${appUrl}/dashboard?type=aging_roof&view=map`,
-      lastModified,
-      changeFrequency: "daily",
-      priority: 0.7,
-    },
-    {
-      url: `${appUrl}/dashboard?type=code_violation`,
-      lastModified,
-      changeFrequency: "daily",
-      priority: 0.6,
-    },
   ];
 }
