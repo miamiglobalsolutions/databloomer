@@ -44,18 +44,24 @@ function hasRecentRoof(
 
 /**
  * DataBloom Score for aging-roof leads (0–100).
+ * Older roofs in the window score higher — a 25 yr roof outranks a 13 yr roof.
  */
-function scoreAgingLead(input: {
+export function scoreAgingLead(input: {
   roofAgeYears: number;
   assessedValue: number | null;
   confidence: LeadConfidence;
-  targetAge: number;
+  minAgeYears: number;
+  maxAgeYears: number;
 }): number {
-  const { roofAgeYears, assessedValue, confidence, targetAge } = input;
-  let score = 50;
+  const { roofAgeYears, assessedValue, confidence, minAgeYears, maxAgeYears } =
+    input;
+  let score = 35;
 
-  const proximity = Math.abs(roofAgeYears - targetAge);
-  score += Math.max(0, 25 - proximity * 8);
+  const span = maxAgeYears - minAgeYears;
+  if (span > 0) {
+    const ageRatio = (roofAgeYears - minAgeYears) / span;
+    score += Math.round(Math.min(1, Math.max(0, ageRatio)) * 35);
+  }
 
   if (confidence === "high") score += 20;
   else if (confidence === "medium") score += 8;
@@ -95,7 +101,6 @@ export function evaluateAgingRoof(
   config: AgingRoofConfig = {
     minAgeYears: 13,
     maxAgeYears: 25,
-    targetAgeYears: 15,
     recentExcludeYears: 5,
     currentYear: new Date().getFullYear(),
   },
@@ -108,7 +113,6 @@ export function evaluateAgingRoof(
     (a, b) => b.issue_date.getTime() - a.issue_date.getTime(),
   );
   const latestPermit = sorted[0] ?? null;
-  const targetAge = config.targetAgeYears;
 
   if (latestPermit) {
     const roofAgeYears = yearsBetween(latestPermit.issue_date);
@@ -141,7 +145,8 @@ export function evaluateAgingRoof(
         roofAgeYears,
         assessedValue: property.assessed_value,
         confidence,
-        targetAge,
+        minAgeYears: config.minAgeYears,
+        maxAgeYears: config.maxAgeYears,
       }),
     };
   }
@@ -174,7 +179,8 @@ export function evaluateAgingRoof(
       roofAgeYears: buildAgeYears,
       assessedValue: property.assessed_value,
       confidence,
-      targetAge,
+      minAgeYears: config.minAgeYears,
+      maxAgeYears: config.maxAgeYears,
     }),
   };
 }

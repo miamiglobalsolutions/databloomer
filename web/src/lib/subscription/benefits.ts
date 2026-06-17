@@ -50,7 +50,7 @@ export const SUBSCRIPTION_BENEFITS: SubscriptionBenefit[] = [
     id: "databloom-score",
     title: "DataBloom Score on every lead",
     description:
-      "Leads ranked 0–100 by roof age, home value, and permit confidence — work the best prospects first.",
+      "Leads ranked 0–100 by roof age (older = higher urgency), home value, and permit confidence — work the best prospects first.",
     status: "included",
   },
   {

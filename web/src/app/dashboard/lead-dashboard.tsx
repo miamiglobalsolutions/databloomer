@@ -32,6 +32,12 @@ const LeadMap = dynamic(
 );
 
 type ViewMode = "list" | "map";
+type ListSort = "score" | "roof_age_desc" | "roof_age_asc";
+
+function parseRoofAgeYears(lead: LeadRecord): number {
+  const n = Number(lead.roof_age_years);
+  return Number.isFinite(n) ? n : -1;
+}
 
 type Props = {
   type: "aging_roof" | "code_violation" | "new_construction";
@@ -53,6 +59,9 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
   );
   const [fullAccess, setFullAccess] = useState(true);
   const [accessChecked, setAccessChecked] = useState(false);
+  const [listSort, setListSort] = useState<ListSort>(
+    type === "aging_roof" ? "roof_age_desc" : "score",
+  );
 
   useEffect(() => {
     fetch("/api/access/me", { cache: "no-store" })
@@ -113,6 +122,22 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
     [leads, activeBloomTiers],
   );
 
+  const sortedLeads = useMemo(() => {
+    const items = [...filteredLeads];
+    if (type === "aging_roof") {
+      if (listSort === "roof_age_desc") {
+        items.sort((a, b) => parseRoofAgeYears(b) - parseRoofAgeYears(a));
+      } else if (listSort === "roof_age_asc") {
+        items.sort((a, b) => parseRoofAgeYears(a) - parseRoofAgeYears(b));
+      } else {
+        items.sort((a, b) => b.score - a.score);
+      }
+    } else {
+      items.sort((a, b) => b.score - a.score);
+    }
+    return items;
+  }, [filteredLeads, listSort, type]);
+
   const selectedLead =
     filteredLeads.find((l) => l.id === selectedId) ?? null;
   const topBloomZips = useMemo(
@@ -137,6 +162,22 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
               className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
             />
           </div>
+          {view === "list" && type === "aging_roof" && (
+            <div>
+              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-stone-500">
+                Sort list
+              </label>
+              <select
+                value={listSort}
+                onChange={(e) => setListSort(e.target.value as ListSort)}
+                className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm"
+              >
+                <option value="roof_age_desc">Roof age (oldest first)</option>
+                <option value="roof_age_asc">Roof age (newest in window)</option>
+                <option value="score">DataBloom Score</option>
+              </select>
+            </div>
+          )}
           <button
             type="button"
             onClick={loadLeads}
@@ -147,7 +188,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
           <button
             type="button"
             disabled={filteredLeads.length === 0 || !canExport}
-            onClick={() => downloadLeadsCsv(filteredLeads, type, fullAccess)}
+            onClick={() => downloadLeadsCsv(sortedLeads, type, fullAccess)}
             className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-800 hover:bg-stone-50 disabled:opacity-50"
             title={
               canExport
@@ -305,7 +346,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="grid gap-4 lg:grid-cols-2">
-            {filteredLeads.map((lead) => (
+            {sortedLeads.map((lead) => (
               <LeadCard key={lead.id} lead={lead} type={type} fullAccess={fullAccess} />
             ))}
           </div>
