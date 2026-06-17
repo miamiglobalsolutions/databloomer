@@ -60,7 +60,7 @@ export const MIAMI_AREA_PAGES: MiamiAreaPage[] = [
     intro:
       "Salt air and hurricane exposure accelerate roof aging in South Beach. Target 33139 with DataBloomer's aging-roof leads and open code enforcement cases.",
     highlights: [
-      "Coastal properties in the 13–17 year replacement window",
+      "Coastal properties in the 13–25 year aging roof window",
       "Weekly Bloom Zone digest for 33139 opportunities",
       "Map pins color-coded by replacement likelihood",
     ],

@@ -78,7 +78,7 @@ export const SUBSCRIPTION_BENEFITS: SubscriptionBenefit[] = [
     id: "aging-roofs",
     title: "Aging roof lead stream",
     description:
-      "Homes in the 13–17 year replacement window from Miami-Dade property appraiser and permit data.",
+      "Homes in the 13–17 year replacement sweet spot plus aging roofs up to 25 years from Miami-Dade property appraiser and permit data.",
     status: "included",
   },
   {

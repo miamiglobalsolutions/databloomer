@@ -69,9 +69,23 @@ function scoreAgingLead(input: {
   return Math.min(100, Math.max(0, Math.round(score)));
 }
 
+function permitSignalSummary(roofAgeYears: number, permitType: string): string {
+  if (roofAgeYears <= 17) {
+    return `Last roof permit ${roofAgeYears} yrs ago (${permitType}) — likely replacement window`;
+  }
+  return `Last roof permit ${roofAgeYears} yrs ago (${permitType}) — aging roof (18–25 yr band)`;
+}
+
+function buildSignalSummary(buildYear: number, buildAgeYears: number): string {
+  if (buildAgeYears <= 17) {
+    return `Built ${buildYear} (~${buildAgeYears} yrs) — no recent re-roof on record; probable aging roof`;
+  }
+  return `Built ${buildYear} (~${buildAgeYears} yrs) — no recent re-roof on record; aging roof (18–25 yr band)`;
+}
+
 /**
  * Core aging-roof logic:
- * 1. HIGH — last roofing permit falls in the 13–17 year window (historical permit data)
+ * 1. HIGH — last roofing permit falls in the 13–25 year window (historical permit data)
  * 2. MEDIUM — no recent roof permit + year_built falls in the same window (proxy)
  * 3. MEDIUM — year_built older but last known roof permit is in window
  */
@@ -80,7 +94,8 @@ export function evaluateAgingRoof(
   permits: RoofPermitSummary[],
   config: AgingRoofConfig = {
     minAgeYears: 13,
-    maxAgeYears: 17,
+    maxAgeYears: 25,
+    targetAgeYears: 15,
     recentExcludeYears: 5,
     currentYear: new Date().getFullYear(),
   },
@@ -93,7 +108,7 @@ export function evaluateAgingRoof(
     (a, b) => b.issue_date.getTime() - a.issue_date.getTime(),
   );
   const latestPermit = sorted[0] ?? null;
-  const targetAge = (config.minAgeYears + config.maxAgeYears) / 2;
+  const targetAge = config.targetAgeYears;
 
   if (latestPermit) {
     const roofAgeYears = yearsBetween(latestPermit.issue_date);
@@ -118,7 +133,10 @@ export function evaluateAgingRoof(
       last_roof_date: latestPermit.issue_date,
       roof_age_years: roofAgeYears,
       confidence,
-      signal_summary: `Last roof permit ${roofAgeYears} yrs ago (${latestPermit.permit_type}) — likely replacement window`,
+      signal_summary: permitSignalSummary(
+        roofAgeYears,
+        latestPermit.permit_type,
+      ),
       score: scoreAgingLead({
         roofAgeYears,
         assessedValue: property.assessed_value,
@@ -151,7 +169,7 @@ export function evaluateAgingRoof(
     last_roof_date: proxyRoofDate,
     roof_age_years: buildAgeYears,
     confidence,
-    signal_summary: `Built ${property.year_built} (~${buildAgeYears} yrs) — no recent re-roof on record; probable aging roof`,
+    signal_summary: buildSignalSummary(property.year_built, buildAgeYears),
     score: scoreAgingLead({
       roofAgeYears: buildAgeYears,
       assessedValue: property.assessed_value,

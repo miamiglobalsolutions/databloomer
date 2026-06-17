@@ -47,6 +47,8 @@ export type RoofPermitRow = {
 export type AgingRoofConfig = {
   minAgeYears: number;
   maxAgeYears: number;
+  /** Sweet-spot age for DataBloom Score (keeps 13–17 yr leads ranked highest). */
+  targetAgeYears: number;
   recentExcludeYears: number;
   currentYear: number;
 };
@@ -54,7 +56,8 @@ export type AgingRoofConfig = {
 export function getAgingRoofConfig(): AgingRoofConfig {
   return {
     minAgeYears: Number(process.env.ROOF_AGE_MIN_YEARS ?? 13),
-    maxAgeYears: Number(process.env.ROOF_AGE_MAX_YEARS ?? 17),
+    maxAgeYears: Number(process.env.ROOF_AGE_MAX_YEARS ?? 25),
+    targetAgeYears: Number(process.env.ROOF_AGE_TARGET_YEARS ?? 15),
     recentExcludeYears: Number(process.env.ROOF_RECENT_EXCLUDE_YEARS ?? 5),
     currentYear: new Date().getFullYear(),
   };

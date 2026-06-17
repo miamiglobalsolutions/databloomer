@@ -32,7 +32,8 @@ export default function HomePage() {
 
           DataBloomer monitors Miami-Dade permits and property records to surface
 
-          aging roof leads in the 13–17 year replacement window, plus open code
+          aging roof leads in the 13–17 year sweet spot plus homes up to 25
+          years, plus open code
 
           enforcement cases. Bloom Zones show your canvassing crews exactly where
 

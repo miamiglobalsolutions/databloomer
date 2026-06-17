@@ -123,7 +123,8 @@ export default function AboutPage() {
           </h2>
           <p className="leading-relaxed text-stone-600">
             Every lead receives a DataBloom Score from 0 to 100. For aging roofs,
-            we combine roof age (targeting the 13–17 year replacement window),
+            we combine roof age (13–17 year sweet spot plus aging roofs up to 25
+            years),
             Miami-Dade property appraiser data, permit history, and home value.
             Higher scores mean a stronger replacement opportunity. Code enforcement
             leads are scored by case urgency and open status.
