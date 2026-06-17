@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AccessAuthControls } from "@/components/access-auth-controls";
+import { DataBloomerLogoMark } from "@/components/databloomer-logo-mark";
 import { SubscriptionBenefitsBar } from "@/components/subscription-benefits-bar";
 import { LeadDashboard } from "./lead-dashboard";
 
@@ -24,9 +25,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600 text-sm font-bold text-white">
-                DB
-              </span>
+              <DataBloomerLogoMark />
               <span className="font-semibold">DataBloomer</span>
             </Link>
             <span className="hidden text-stone-400 sm:inline">/</span>

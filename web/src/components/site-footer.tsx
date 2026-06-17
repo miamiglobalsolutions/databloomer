@@ -5,6 +5,7 @@ import {
   MIAMI_AREA_PAGES,
 } from "@/lib/miami-dade/areas";
 import { AREA_REGION_LABELS, AREA_REGION_ORDER } from "@/lib/miami-dade/area-regions";
+import { DataBloomerLogoMark } from "./databloomer-logo-mark";
 
 export function SiteFooter() {
   const featured = getFeaturedAreas();
@@ -16,9 +17,7 @@ export function SiteFooter() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Link href="/" className="flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600 text-sm font-bold text-white">
-                DB
-              </span>
+              <DataBloomerLogoMark />
               <span className="text-lg font-semibold tracking-tight">DataBloomer</span>
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-stone-600">

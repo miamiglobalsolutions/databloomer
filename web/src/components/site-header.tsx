@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AccessAuthControls } from "./access-auth-controls";
+import { DataBloomerLogoMark } from "./databloomer-logo-mark";
 import { SubscriptionBenefitsBar } from "./subscription-benefits-bar";
 
 type Props = {
@@ -12,9 +13,7 @@ export function SiteHeader({ active, showBenefitsBar = active !== "subscribe" }:
     <header className="border-b border-stone-200 bg-white">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
         <Link href="/" className="flex items-center gap-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600 text-sm font-bold text-white">
-            DB
-          </span>
+          <DataBloomerLogoMark />
           <span className="text-lg font-semibold tracking-tight">DataBloomer</span>
         </Link>
         <nav className="flex flex-wrap items-center gap-2">
