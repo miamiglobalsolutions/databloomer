@@ -35,7 +35,7 @@ export const SUBSCRIPTION_BENEFITS: SubscriptionBenefit[] = [
     id: "county-map",
     title: "Interactive map view",
     description:
-      "Zoom, pan, and explore every color-coded Bloom Zone pin across Miami-Dade (~8,000+ aging roofs) with street and satellite layers.",
+      "Zoom, pan, and explore every color-coded Bloom Zone pin across Miami-Dade (55,000+ aging roofs) with street and satellite layers.",
     status: "included",
     highlight: true,
   },
@@ -66,6 +66,14 @@ export const SUBSCRIPTION_BENEFITS: SubscriptionBenefit[] = [
     description:
       "Weekly-ranked ZIP codes showing where replacement-likely leads cluster — plan crew deployment fast.",
     status: "included",
+  },
+  {
+    id: "reddit-requests",
+    title: "Reddit roofing request feed",
+    description:
+      "Subscriber-only links to recent r/Miami and r/southflorida posts from the past 2 weeks — roof repair, replacement, leaks, and contractor recommendation requests.",
+    status: "included",
+    highlight: true,
   },
   {
     id: "email-digest",

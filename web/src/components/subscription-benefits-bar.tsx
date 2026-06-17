@@ -5,7 +5,7 @@ const TOP_BENEFIT_IDS = [
   "addresses",
   "folios",
   "county-map",
-  "csv-export",
+  "reddit-requests",
 ] as const;
 
 /** Short list for the top-of-page benefits strip. */

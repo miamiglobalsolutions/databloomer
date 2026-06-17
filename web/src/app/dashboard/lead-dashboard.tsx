@@ -20,6 +20,7 @@ import { normalizeZipInput } from "@/lib/miami-dade/zips";
 import type { BloomMapStyle } from "./lead-map";
 import { LeadCard } from "./lead-card";
 import { RisingBloomZipsPanel } from "./rising-bloom-zips";
+import { RedditRoofRequestsPanel } from "./reddit-roof-requests-panel";
 import { TopBloomZipsPanel } from "./top-bloom-zips";
 
 const LeadMap = dynamic(
@@ -391,6 +392,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
               activeZip={normalizeZipInput(zip)}
               onSelectZip={setZip}
             />
+            <RedditRoofRequestsPanel preview={!fullAccess} />
             <div>
               <h2 className="mb-2 text-sm font-semibold text-stone-700">
                 {selectedLead
@@ -439,6 +441,7 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
               activeZip={normalizeZipInput(zip)}
               onSelectZip={setZip}
             />
+            <RedditRoofRequestsPanel preview={!fullAccess} />
             <DigestSubscribe compact />
           </aside>
         </div>
