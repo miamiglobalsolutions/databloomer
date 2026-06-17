@@ -1,63 +1,61 @@
-import { evaluateAgingRoof } from "@/lib/leads/aging-roof";
+import { evaluateAgingRoof, type AgingRoofCandidate } from "@/lib/leads/aging-roof";
 import { getAgingRoofConfig, type PropertyRow } from "@/lib/leads/types";
 import { query } from "@/lib/db/client";
+
+const LEAD_UPSERT_BATCH = 200;
 
 function formatDate(d: Date | null): string | null {
   if (!d) return null;
   return d.toISOString().slice(0, 10);
 }
 
-export async function refreshAgingRoofLeads(): Promise<number> {
-  const config = getAgingRoofConfig();
+async function upsertAgingLeadBatch(candidates: AgingRoofCandidate[]): Promise<void> {
+  if (candidates.length === 0) return;
 
-  const properties = await query<PropertyRow>(
-    `SELECT folio, address, city, zip, year_built, assessed_value, lat, lng
-     FROM properties`,
-  );
+  for (let offset = 0; offset < candidates.length; offset += LEAD_UPSERT_BATCH) {
+    const chunk = candidates.slice(offset, offset + LEAD_UPSERT_BATCH);
+    const ids = chunk.map((c) => `aging-${c.folio}`);
+    const folios = chunk.map((c) => c.folio);
+    const addresses = chunk.map((c) => c.address);
+    const zips = chunk.map((c) => c.zip);
+    const scores = chunk.map((c) => c.score);
+    const confidences = chunk.map((c) => c.confidence);
+    const roofAges = chunk.map((c) => c.roof_age_years);
+    const lastRoofDates = chunk.map((c) => formatDate(c.last_roof_date));
+    const yearBuilts = chunk.map((c) => c.year_built);
+    const assessedValues = chunk.map((c) => c.assessed_value);
+    const summaries = chunk.map((c) => c.signal_summary);
+    const lats = chunk.map((c) => c.lat);
+    const lngs = chunk.map((c) => c.lng);
 
-  let upserted = 0;
-
-  for (const property of properties.rows) {
-    const permitsResult = await query<{
-      issue_date: Date;
-      permit_type: string;
-      source: string;
-    }>(
-      `SELECT issue_date, permit_type, source
-       FROM roof_permits
-       WHERE folio = $1
-       ORDER BY issue_date DESC`,
-      [property.folio],
-    );
-
-    const candidate = evaluateAgingRoof(
-      property,
-      permitsResult.rows.map((row) => ({
-        issue_date: row.issue_date,
-        permit_type: row.permit_type,
-        source: row.source,
-      })),
-      config,
-    );
-
-    if (!candidate) {
-      await query(
-        `DELETE FROM leads WHERE lead_type = 'aging_roof' AND folio = $1`,
-        [property.folio],
-      );
-      continue;
-    }
-
-    const leadId = `aging-${property.folio}`;
     await query(
       `INSERT INTO leads (
         id, lead_type, folio, address, zip, score, confidence,
         roof_age_years, last_roof_date, year_built, assessed_value,
         violation_case, violation_desc, signal_summary, lat, lng, computed_at
-      ) VALUES (
-        $1, 'aging_roof', $2, $3, $4, $5, $6,
-        $7, $8, $9, $10,
-        NULL, NULL, $11, $12, $13, NOW()
+      )
+      SELECT
+        u.id, 'aging_roof', u.folio, u.address, u.zip, u.score, u.confidence::lead_confidence,
+        u.roof_age_years, u.last_roof_date::date, u.year_built, u.assessed_value,
+        NULL, NULL, u.signal_summary, u.lat, u.lng, NOW()
+      FROM UNNEST(
+        $1::text[],
+        $2::text[],
+        $3::text[],
+        $4::text[],
+        $5::int[],
+        $6::text[],
+        $7::numeric[],
+        $8::text[],
+        $9::int[],
+        $10::numeric[],
+        $11::text[],
+        $12::float8[],
+        $13::float8[]
+      ) AS u(
+        id, folio, address, zip, score, confidence,
+        roof_age_years, last_roof_date, year_built, assessed_value,
+        signal_summary, lat, lng
       )
       ON CONFLICT (lead_type, folio) DO UPDATE SET
         address = EXCLUDED.address,
@@ -73,25 +71,84 @@ export async function refreshAgingRoofLeads(): Promise<number> {
         lng = EXCLUDED.lng,
         computed_at = NOW()`,
       [
-        leadId,
-        candidate.folio,
-        candidate.address,
-        candidate.zip,
-        candidate.score,
-        candidate.confidence,
-        candidate.roof_age_years,
-        formatDate(candidate.last_roof_date),
-        candidate.year_built,
-        candidate.assessed_value,
-        candidate.signal_summary,
-        candidate.lat,
-        candidate.lng,
+        ids,
+        folios,
+        addresses,
+        zips,
+        scores,
+        confidences,
+        roofAges,
+        lastRoofDates,
+        yearBuilts,
+        assessedValues,
+        summaries,
+        lats,
+        lngs,
       ],
     );
-    upserted += 1;
+  }
+}
+
+export async function refreshAgingRoofLeads(): Promise<number> {
+  const config = getAgingRoofConfig();
+
+  const [properties, permitsResult] = await Promise.all([
+    query<PropertyRow>(
+      `SELECT folio, address, city, zip, year_built, assessed_value, lat, lng
+       FROM properties`,
+    ),
+    query<{
+      folio: string;
+      issue_date: Date;
+      permit_type: string;
+      source: string;
+    }>(
+      `SELECT folio, issue_date, permit_type, source
+       FROM roof_permits
+       WHERE folio IS NOT NULL
+       ORDER BY folio, issue_date DESC`,
+    ),
+  ]);
+
+  const permitsByFolio = new Map<
+    string,
+    { issue_date: Date; permit_type: string; source: string }[]
+  >();
+
+  for (const row of permitsResult.rows) {
+    const list = permitsByFolio.get(row.folio) ?? [];
+    list.push({
+      issue_date: row.issue_date,
+      permit_type: row.permit_type,
+      source: row.source,
+    });
+    permitsByFolio.set(row.folio, list);
   }
 
-  return upserted;
+  const candidates: AgingRoofCandidate[] = [];
+
+  for (const property of properties.rows) {
+    const permits = permitsByFolio.get(property.folio) ?? [];
+    const candidate = evaluateAgingRoof(property, permits, config);
+    if (candidate) candidates.push(candidate);
+  }
+
+  await upsertAgingLeadBatch(candidates);
+
+  if (candidates.length > 0) {
+    const folios = candidates.map((c) => c.folio);
+    await query(
+      `DELETE FROM leads
+       WHERE lead_type = 'aging_roof'
+         AND folio IS NOT NULL
+         AND NOT (folio = ANY($1::text[]))`,
+      [folios],
+    );
+  } else {
+    await query(`DELETE FROM leads WHERE lead_type = 'aging_roof'`);
+  }
+
+  return candidates.length;
 }
 
 export async function refreshViolationLeads(): Promise<number> {

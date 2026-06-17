@@ -12,6 +12,7 @@ import type { BloomZoneTier } from "@/lib/leads/databloom-score";
 import { filterLeadsByBloomZone } from "@/lib/leads/databloom-score";
 import { computeTopBloomZips } from "@/lib/leads/bloom-zips";
 import { downloadLeadsCsv } from "@/lib/leads/export-csv";
+import { LEADS_API_MAX, LEADS_ZIP_MAX } from "@/lib/leads/limits";
 import type { LeadRecord } from "@/lib/leads/types";
 import type { NeighborhoodBloomForecast } from "@/lib/leads/neighborhood-bloom";
 import { AREA_ZIP_SHORTCUTS } from "@/lib/miami-dade/areas";
@@ -92,9 +93,9 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
 
       if (zipFilter) {
         params.set("zip", zipFilter);
-        params.set("limit", "500");
-      } else if (view === "map" && fullAccess) {
-        params.set("limit", "8500");
+        params.set("limit", String(LEADS_ZIP_MAX));
+      } else if (fullAccess) {
+        params.set("limit", String(LEADS_API_MAX));
       } else if (view === "map") {
         params.set("diverse", "true");
         params.set("perZip", "2");

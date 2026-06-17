@@ -14,7 +14,9 @@ async function main() {
   if (useSample) {
     console.log("Seeding sample data…");
   } else {
-    console.log("Ingesting live Miami-Dade data from county ArcGIS APIs…");
+    console.log(
+      "Ingesting live Miami-Dade data — all county ZIPs (~58k aging parcels). This may take 30–90 minutes…",
+    );
   }
 
   const summary = useSample ? await seedSampleData() : await ingestMiamiDade();

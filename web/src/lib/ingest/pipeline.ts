@@ -2,7 +2,6 @@ import type { PoolClient } from "pg";
 import {
   fetchAgingPropertiesByZip,
   fetchConstructionPermits,
-  fetchPropertiesByYearBuilt,
   fetchRoofPermits,
   fetchRoofViolations,
   type ParsedConstructionPermit,
@@ -13,10 +12,12 @@ import {
 import { getAgingRoofConfig } from "@/lib/leads/types";
 import { fetchHistoricalRoofPermits, shovelsConfigured } from "@/lib/shovels/client";
 import { MIAMI_DADE_ZIP_CODES } from "@/lib/miami-dade/zips";
+import { getZipIngestCursor, setZipIngestCursor } from "@/lib/ingest/state";
 import { query } from "@/lib/db/client";
 
-const DEFAULT_MAX_PROPERTIES = Number(process.env.INGEST_MAX_PROPERTIES ?? 8500);
-
+/** Max aging parcels fetched per ZIP (county GIS has no hard cap; largest ZIPs are ~1.5k). */
+const DEFAULT_MAX_PER_ZIP = Number(process.env.INGEST_MAX_PER_ZIP ?? 5000);
+const PROPERTY_UPSERT_BATCH = 100;
 async function startRun(source: string): Promise<number> {
   const result = await query<{ id: number }>(
     `INSERT INTO ingest_runs (source, status) VALUES ($1, 'running') RETURNING id`,
@@ -41,32 +42,100 @@ async function finishRun(
 }
 
 async function upsertProperty(property: ParsedProperty, client?: PoolClient) {
-  const q = client?.query.bind(client) ?? query;
-  await q(
-    `INSERT INTO properties (folio, address, city, zip, year_built, assessed_value, lat, lng, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
-     ON CONFLICT (folio) DO UPDATE SET
-       address = EXCLUDED.address,
-       city = EXCLUDED.city,
-       zip = EXCLUDED.zip,
-       year_built = EXCLUDED.year_built,
-       assessed_value = EXCLUDED.assessed_value,
-       lat = COALESCE(EXCLUDED.lat, properties.lat),
-       lng = COALESCE(EXCLUDED.lng, properties.lng),
-       updated_at = NOW()`,
-    [
-      property.folio,
-      property.address,
-      property.city,
-      property.zip,
-      property.year_built,
-      property.assessed_value,
-      property.lat,
-      property.lng,
-    ],
-  );
+  await upsertPropertiesBatch([property], client);
 }
 
+async function upsertPropertiesBatch(
+  rows: ParsedProperty[],
+  client?: PoolClient,
+) {
+  if (rows.length === 0) return;
+
+  const q = client?.query.bind(client) ?? query;
+
+  for (let offset = 0; offset < rows.length; offset += PROPERTY_UPSERT_BATCH) {
+    const chunk = rows.slice(offset, offset + PROPERTY_UPSERT_BATCH);
+    await q(
+      `INSERT INTO properties (folio, address, city, zip, year_built, assessed_value, lat, lng, updated_at)
+       SELECT u.folio, u.address, u.city, u.zip, u.year_built, u.assessed_value, u.lat, u.lng, NOW()
+       FROM UNNEST(
+         $1::text[],
+         $2::text[],
+         $3::text[],
+         $4::text[],
+         $5::int[],
+         $6::numeric[],
+         $7::float8[],
+         $8::float8[]
+       ) AS u(
+         folio, address, city, zip, year_built, assessed_value, lat, lng
+       )
+       ON CONFLICT (folio) DO UPDATE SET
+         address = EXCLUDED.address,
+         city = EXCLUDED.city,
+         zip = EXCLUDED.zip,
+         year_built = EXCLUDED.year_built,
+         assessed_value = EXCLUDED.assessed_value,
+         lat = COALESCE(EXCLUDED.lat, properties.lat),
+         lng = COALESCE(EXCLUDED.lng, properties.lng),
+         updated_at = NOW()`,
+      [
+        chunk.map((p) => p.folio),
+        chunk.map((p) => p.address),
+        chunk.map((p) => p.city),
+        chunk.map((p) => p.zip),
+        chunk.map((p) => p.year_built),
+        chunk.map((p) => p.assessed_value),
+        chunk.map((p) => p.lat),
+        chunk.map((p) => p.lng),
+      ],
+    );
+  }
+}
+
+async function ingestPropertiesByZip(options: {
+  zipCodes: string[];
+  targetMinYear: number;
+  targetMaxYear: number;
+  maxPerZip: number;
+  seenFolios: Set<string>;
+  log: (message: string) => void;
+}): Promise<number> {
+  const { zipCodes, targetMinYear, targetMaxYear, maxPerZip, seenFolios, log } =
+    options;
+  let properties = 0;
+
+  log(
+    `Fetching aging properties by ZIP (${zipCodes.length} codes, up to ${maxPerZip}/zip, built ${targetMinYear}–${targetMaxYear})…`,
+  );
+
+  for (const zip of zipCodes) {
+    const batch = await fetchAgingPropertiesByZip(
+      zip,
+      targetMinYear,
+      targetMaxYear,
+      maxPerZip,
+    );
+
+    const toUpsert: ParsedProperty[] = [];
+    for (const property of batch) {
+      if (seenFolios.has(property.folio)) continue;
+      seenFolios.add(property.folio);
+      toUpsert.push(property);
+    }
+
+    if (toUpsert.length > 0) {
+      await upsertPropertiesBatch(toUpsert);
+      properties += toUpsert.length;
+    }
+
+    if (batch.length > 0) {
+      log(`  Zip ${zip}: ${batch.length} parcel(s)`);
+    }
+  }
+
+  return properties;
+}
 async function upsertPermit(permit: ParsedRoofPermit, source: string) {
   if (permit.folio) {
     await upsertProperty({
@@ -205,8 +274,14 @@ export async function clearAllData(): Promise<void> {
 }
 
 export async function ingestMiamiDade(options?: {
-  maxProperties?: number;
+  /** When true, skip parcel fetch (permits/violations only — for short cron runs). */
+  skipProperties?: boolean;
+  /** Full county ZIP list, or a cron chunk when zipBatchSize is set. */
   zipCodes?: string[];
+  /** Process this many ZIPs starting at zipCursor (cron incremental refresh). */
+  zipBatchSize?: number;
+  zipCursor?: number;
+  maxPerZip?: number;
   onProgress?: (message: string) => void;
 }): Promise<IngestSummary> {
   const config = getAgingRoofConfig();
@@ -222,43 +297,41 @@ export async function ingestMiamiDade(options?: {
   let shovelsPermits = 0;
 
   try {
-    const maxProperties = options?.maxProperties ?? DEFAULT_MAX_PROPERTIES;
+    const maxPerZip = options?.maxPerZip ?? DEFAULT_MAX_PER_ZIP;
     const seenFolios = new Set<string>();
+    const allZips = options?.zipCodes ?? [...MIAMI_DADE_ZIP_CODES];
 
-    if (options?.zipCodes?.length) {
-      log(
-        `Fetching aging properties (built ${targetMinYear}–${targetMaxYear}) for ${options.zipCodes.length} zip code(s)…`,
-      );
-      for (const zip of options.zipCodes) {
-        log(`  Zip ${zip}…`);
-        const batch = await fetchAgingPropertiesByZip(
-          zip,
-          targetMinYear,
-          targetMaxYear,
-          2000,
-        );
-        for (const property of batch) {
-          if (seenFolios.has(property.folio)) continue;
-          seenFolios.add(property.folio);
-          await upsertProperty(property);
-          properties += 1;
+    if (!options?.skipProperties) {
+      let zipsToFetch = allZips;
+
+      if (options?.zipBatchSize != null && options.zipBatchSize > 0) {
+        const cursor =
+          options.zipCursor ??
+          (await getZipIngestCursor());
+        const batchSize = Math.min(options.zipBatchSize, allZips.length);
+        zipsToFetch = [];
+        for (let i = 0; i < batchSize; i++) {
+          zipsToFetch.push(allZips[(cursor + i) % allZips.length]);
         }
+        const nextCursor = (cursor + batchSize) % allZips.length;
+        await setZipIngestCursor(nextCursor);
+        log(
+          `Cron property batch: ZIPs ${cursor}–${cursor + batchSize - 1} (next cursor ${nextCursor})`,
+        );
       }
-    } else {
-      log(
-        `Fetching all aging properties county-wide (built ${targetMinYear}–${targetMaxYear}, up to ${maxProperties})…`,
-      );
-      const propertyRows = await fetchPropertiesByYearBuilt({
-        minYearBuilt: targetMinYear,
-        maxYearBuilt: targetMaxYear,
-        maxRecords: maxProperties,
-      });
-      for (const property of propertyRows) {
-        await upsertProperty(property);
-        properties += 1;
-      }
-    }
 
+      properties = await ingestPropertiesByZip({
+        zipCodes: zipsToFetch,
+        targetMinYear,
+        targetMaxYear,
+        maxPerZip,
+        seenFolios,
+        log,
+      });
+      log(`Property ingest complete: ${properties} parcel(s) upserted.`);
+    } else {
+      log("Skipping property parcel fetch (permits/violations refresh only).");
+    }
     log("Fetching recent roofing permits (APPTYPE 13/18/20)…");
     const permitRows = await fetchRoofPermits();
     for (const permit of permitRows) {
@@ -287,7 +360,7 @@ export async function ingestMiamiDade(options?: {
     }
 
     if (shovelsConfigured()) {
-      const zips = options?.zipCodes ?? [...MIAMI_DADE_ZIP_CODES];
+      const zips = allZips;
       const permitFrom = `${targetMinYear}-01-01`;
       const permitTo = `${targetMaxYear}-12-31`;
       const historical = await fetchHistoricalRoofPermits({

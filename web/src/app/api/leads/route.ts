@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import type { LeadRecord } from "@/lib/leads/types";
+import { LEADS_API_MAX, LEADS_ZIP_MAX } from "@/lib/leads/limits";
 import { normalizeZipInput } from "@/lib/miami-dade/zips";
 import { query } from "@/lib/db/client";
 import { isSubscriptionGatingEnabled, maskAddress, maskFolio } from "@/lib/subscription/access";
@@ -25,7 +26,10 @@ export async function GET(request: Request) {
   const zip = zipRaw ? normalizeZipInput(zipRaw) : null;
   const diverse = searchParams.get("diverse") === "true";
   const perZip = Math.min(Number(searchParams.get("perZip") ?? 15), 50);
-  const limit = Math.min(Number(searchParams.get("limit") ?? 50), 8500);
+  const limit = Math.min(
+    Number(searchParams.get("limit") ?? 50),
+    zip ? LEADS_ZIP_MAX : LEADS_API_MAX,
+  );
 
   try {
     const access = await getAccessForRequest(request);

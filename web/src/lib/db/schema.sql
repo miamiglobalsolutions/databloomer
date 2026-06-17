@@ -137,6 +137,12 @@ CREATE TABLE IF NOT EXISTS digest_subscribers (
 
 CREATE INDEX IF NOT EXISTS idx_digest_subscribers_active ON digest_subscribers (active);
 
+CREATE TABLE IF NOT EXISTS ingest_state (
+  key         TEXT PRIMARY KEY,
+  value       TEXT NOT NULL,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS stripe_subscribers (
   id                      SERIAL PRIMARY KEY,
   email                   TEXT NOT NULL UNIQUE,
