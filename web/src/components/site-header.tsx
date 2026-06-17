@@ -3,7 +3,7 @@ import { AccessAuthControls } from "./access-auth-controls";
 import { SubscriptionBenefitsBar } from "./subscription-benefits-bar";
 
 type Props = {
-  active?: "home" | "about" | "subscribe" | "dashboard";
+  active?: "home" | "about" | "subscribe" | "dashboard" | "contact" | "help";
   showBenefitsBar?: boolean;
 };
 
@@ -21,6 +21,12 @@ export function SiteHeader({ active, showBenefitsBar = active !== "subscribe" }:
           <NavLink href="/about" active={active === "about"}>
             About
           </NavLink>
+          <NavLink href="/contact" active={active === "contact"}>
+            Contact
+          </NavLink>
+          <NavLink href="/help" active={active === "help"}>
+            Help
+          </NavLink>
           <NavLink href="/subscribe" active={active === "subscribe"} highlight>
             Subscribe
           </NavLink>
@@ -32,7 +38,7 @@ export function SiteHeader({ active, showBenefitsBar = active !== "subscribe" }:
                 : "bg-orange-600 text-white hover:bg-orange-700"
             }`}
           >
-            Open dashboard
+            Dashboard
           </Link>
           <AccessAuthControls compact />
         </nav>

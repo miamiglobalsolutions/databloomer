@@ -40,6 +40,18 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               About
             </Link>
             <Link
+              href="/contact"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100"
+            >
+              Contact
+            </Link>
+            <Link
+              href="/help"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100"
+            >
+              Help
+            </Link>
+            <Link
               href="/subscribe"
               className="rounded-lg px-3 py-2 text-sm font-medium text-orange-700 hover:bg-orange-50"
             >

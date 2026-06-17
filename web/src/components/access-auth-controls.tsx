@@ -93,7 +93,7 @@ export function AccessAuthControls({ compact }: { compact?: boolean }) {
         href="/subscribe#sign-in"
         className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 hover:bg-stone-50"
       >
-        Subscriber sign in
+        Sign-in
       </Link>
       <span className="hidden text-xs text-stone-500 sm:inline">Preview mode</span>
     </div>
