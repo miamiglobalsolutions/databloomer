@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     canonical: `${appUrl}/about`,
   },
   openGraph: {
-    title: "About DataBloomer — Miami Roofing Lead Intelligence",
+    title: "About DataBloomer — Miami Roofing Lead AI Intelligence",
     description:
       "Find aging roofs and enforcement leads across Miami-Dade with Bloom Zones and the DataBloom Score.",
     url: `${appUrl}/about`,
@@ -50,7 +50,7 @@ const jsonLd = {
   operatingSystem: "Web",
   url: appUrl,
   description:
-    "Miami-Dade roofing lead intelligence for contractors — aging roof leads, Bloom Zones color-coded maps, and DataBloom Score ranking.",
+    "Miami-Dade roofing lead AI Intelligence for contractors — aging roof leads, Bloom Zones color-coded maps, and DataBloom Score ranking.",
   areaServed: {
     "@type": "AdministrativeArea",
     name: "Miami-Dade County, Florida",
@@ -76,7 +76,7 @@ export default function AboutPage() {
           About DataBloomer
         </p>
         <h1 className="text-4xl font-bold tracking-tight text-stone-900">
-          Miami-Dade roofing lead intelligence built for canvassing crews
+          Miami-Dade roofing lead AI Intelligence built for canvassing crews
         </h1>
         <p className="mt-6 text-lg leading-relaxed text-stone-600">
           DataBloomer helps roofing contractors in Miami-Dade County find homes
@@ -161,16 +161,26 @@ export default function AboutPage() {
             Neighborhood lead pages
           </h2>
           <p className="leading-relaxed text-stone-600">
-            Explore roofing leads by Miami-Dade market:
+            Explore roofing leads across {MIAMI_AREA_PAGES.length} Miami-Dade
+            cities, towns, villages, and neighborhoods — each with ZIP-level
+            Bloom forecast data where available.
           </p>
-          <ul className="grid gap-2 sm:grid-cols-2">
+          <p>
+            <Link
+              href="/areas"
+              className="font-medium text-orange-700 hover:underline"
+            >
+              Browse all markets →
+            </Link>
+          </p>
+          <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {MIAMI_AREA_PAGES.map((area) => (
               <li key={area.slug}>
                 <Link
                   href={`/areas/${area.slug}`}
                   className="text-orange-700 hover:underline"
                 >
-                  {area.name} roofing leads ({area.zip})
+                  {area.name} ({area.zip})
                 </Link>
               </li>
             ))}

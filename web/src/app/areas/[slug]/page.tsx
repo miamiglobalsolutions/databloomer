@@ -73,6 +73,13 @@ export default async function AreaPage({ params }: PageProps) {
       <SiteHeader />
 
       <article className="mx-auto max-w-3xl px-6 py-16">
+        <nav className="mb-6 text-sm text-stone-500">
+          <Link href="/areas" className="hover:text-orange-700 hover:underline">
+            All markets
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-stone-700">{area.name}</span>
+        </nav>
         <p className="mb-2 text-sm font-medium text-orange-600">
           Miami-Dade · ZIP {area.zip}
         </p>

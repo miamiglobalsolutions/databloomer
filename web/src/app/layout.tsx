@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s | DataBloomer",
   },
   description:
-    "Miami-Dade roofing lead intelligence for contractors. Aging roof leads, Bloom Zones color-coded maps, DataBloom Score, and code enforcement opportunities.",
+    "Miami-Dade roofing lead AI Intelligence for contractors. Aging roof leads, Bloom Zones color-coded maps, DataBloom Score, and code enforcement opportunities.",
   keywords: [
     "Miami roofing leads",
     "Miami-Dade roof replacement",
@@ -72,6 +73,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-stone-50 text-stone-900">
         {children}
+        <SiteFooter />
       </body>
     </html>
   );

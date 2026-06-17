@@ -39,6 +39,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.95,
     },
+    {
+      url: `${appUrl}/areas`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
     ...areaEntries,
     {
       url: `${appUrl}/dashboard`,
