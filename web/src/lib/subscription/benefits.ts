@@ -59,6 +59,7 @@ export const SUBSCRIPTION_BENEFITS: SubscriptionBenefit[] = [
     description:
       "Download full lead lists with address, folio, score, and map coordinates for your CRM or door-knock routes.",
     status: "included",
+    highlight: true,
   },
   {
     id: "top-zips",
@@ -77,10 +78,11 @@ export const SUBSCRIPTION_BENEFITS: SubscriptionBenefit[] = [
   },
   {
     id: "email-digest",
-    title: "Weekly Bloom Zone email digest",
+    title: "Weekly email lead updates",
     description:
-      "Monday email with the hottest ZIPs and opportunity summary so owners know where to send teams.",
+      "Monday email with refreshed lead counts, top Bloom ZIPs, and replacement-ready opportunities — stay current as county data updates.",
     status: "included",
+    highlight: true,
   },
   {
     id: "aging-roofs",
