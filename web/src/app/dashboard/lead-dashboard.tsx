@@ -13,10 +13,12 @@ import { filterLeadsByBloomZone } from "@/lib/leads/databloom-score";
 import { computeTopBloomZips } from "@/lib/leads/bloom-zips";
 import { downloadLeadsCsv } from "@/lib/leads/export-csv";
 import type { LeadRecord } from "@/lib/leads/types";
+import type { NeighborhoodBloomForecast } from "@/lib/leads/neighborhood-bloom";
 import { AREA_ZIP_SHORTCUTS } from "@/lib/miami-dade/areas";
 import { normalizeZipInput } from "@/lib/miami-dade/zips";
 import type { BloomMapStyle } from "./lead-map";
 import { LeadCard } from "./lead-card";
+import { RisingBloomZipsPanel } from "./rising-bloom-zips";
 import { TopBloomZipsPanel } from "./top-bloom-zips";
 
 const LeadMap = dynamic(
@@ -62,6 +64,12 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
   const [listSort, setListSort] = useState<ListSort>(
     type === "aging_roof" ? "roof_age_desc" : "score",
   );
+  const [bloomForecasts, setBloomForecasts] = useState<NeighborhoodBloomForecast[]>(
+    [],
+  );
+  const [forecastPreview, setForecastPreview] = useState(false);
+  const [showForecastLayer, setShowForecastLayer] = useState(true);
+  const [forecastLoading, setForecastLoading] = useState(false);
 
   useEffect(() => {
     fetch("/api/access/me", { cache: "no-store" })
@@ -116,6 +124,27 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
     if (!accessChecked) return;
     loadLeads();
   }, [loadLeads, accessChecked]);
+
+  useEffect(() => {
+    if (type !== "aging_roof") {
+      setBloomForecasts([]);
+      return;
+    }
+    setForecastLoading(true);
+    fetch("/api/bloom-forecast", { cache: "no-store" })
+      .then((res) => res.json())
+      .then(
+        (data: {
+          forecasts?: NeighborhoodBloomForecast[];
+          preview?: boolean;
+        }) => {
+          setBloomForecasts(data.forecasts ?? []);
+          setForecastPreview(Boolean(data.preview));
+        },
+      )
+      .catch(() => setBloomForecasts([]))
+      .finally(() => setForecastLoading(false));
+  }, [type, fullAccess, accessChecked]);
 
   const filteredLeads = useMemo(
     () => filterLeadsByBloomZone(leads, activeBloomTiers),
@@ -242,6 +271,16 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
         </p>
       )}
 
+      {type === "aging_roof" && !forecastLoading && bloomForecasts.length > 0 && (
+        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-950">
+          <strong>Neighborhood Bloom forecast</strong> ranks ZIPs where re-roof
+          permit momentum and aging inventory suggest the next replacement wave.
+          {view === "map" && fullAccess
+            ? " Dashed circles on the map show ZIP-level bloom scores."
+            : null}
+        </p>
+      )}
+
       <div className="flex flex-wrap gap-2">
         {AREA_ZIP_SHORTCUTS.map((area) => {
           const active = zip === area.zip;
@@ -300,6 +339,22 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
               >
                 Minimal pins
               </button>
+              {type === "aging_roof" && fullAccess && (
+                <>
+                  <span className="text-stone-300">|</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowForecastLayer((v) => !v)}
+                    className={`rounded-md px-3 py-1 text-xs font-medium ${
+                      showForecastLayer
+                        ? "bg-red-700 text-white"
+                        : "bg-white text-stone-600"
+                    }`}
+                  >
+                    Bloom forecast layer
+                  </button>
+                </>
+              )}
             </div>
             <LeadMap
               leads={filteredLeads}
@@ -308,9 +363,28 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
               onSelect={setSelectedId}
               mapStyle={mapStyle}
               interactive={fullAccess}
+              forecastOverlay={
+                type === "aging_roof" && showForecastLayer
+                  ? {
+                      enabled: true,
+                      forecasts: bloomForecasts,
+                      selectedZip: normalizeZipInput(zip) || null,
+                      onSelectZip: setZip,
+                      preview: forecastPreview,
+                    }
+                  : undefined
+              }
             />
           </div>
           <aside className="space-y-4">
+            {type === "aging_roof" && (
+              <RisingBloomZipsPanel
+                forecasts={bloomForecasts}
+                activeZip={normalizeZipInput(zip)}
+                preview={forecastPreview}
+                onSelectZip={setZip}
+              />
+            )}
             <TopBloomZipsPanel
               zips={topBloomZips}
               activeZip={normalizeZipInput(zip)}
@@ -351,6 +425,14 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
             ))}
           </div>
           <aside className="space-y-4">
+            {type === "aging_roof" && (
+              <RisingBloomZipsPanel
+                forecasts={bloomForecasts}
+                activeZip={normalizeZipInput(zip)}
+                preview={forecastPreview}
+                onSelectZip={setZip}
+              />
+            )}
             <TopBloomZipsPanel
               zips={topBloomZips}
               activeZip={normalizeZipInput(zip)}

@@ -18,6 +18,8 @@ import {
   getBloomZoneTier,
 } from "@/lib/leads/databloom-score";
 import { displayAddress } from "@/lib/subscription/access";
+import type { NeighborhoodBloomForecast } from "@/lib/leads/neighborhood-bloom";
+import { BloomForecastMapLayer } from "./bloom-forecast-map-layer";
 import "leaflet/dist/leaflet.css";
 
 const MIAMI_CENTER: [number, number] = [25.7617, -80.1918];
@@ -128,6 +130,13 @@ type Props = {
   mapStyle?: BloomMapStyle;
   /** When false, map is visible but pan/zoom/pin clicks are disabled. */
   interactive?: boolean;
+  forecastOverlay?: {
+    enabled: boolean;
+    forecasts: NeighborhoodBloomForecast[];
+    selectedZip: string | null;
+    onSelectZip: (zip: string) => void;
+    preview?: boolean;
+  };
 };
 
 export function BloomZonesMap({
@@ -137,6 +146,7 @@ export function BloomZonesMap({
   onSelect,
   mapStyle = "zones",
   interactive = true,
+  forecastOverlay,
 }: Props) {
   const [basemap, setBasemap] = useState<Basemap>("street");
 
@@ -187,6 +197,17 @@ export function BloomZonesMap({
           ))}
         </div>
 
+        {forecastOverlay?.enabled && (
+          <div className="absolute bottom-3 left-3 z-[1000] max-w-[220px] rounded-lg border border-stone-200 bg-white/95 px-3 py-2 text-xs text-stone-600 shadow-md backdrop-blur-sm">
+            <p className="font-semibold uppercase tracking-wide text-stone-500">
+              Bloom forecast
+            </p>
+            <p className="mt-1">
+              Dashed circles = ZIP bloom score (red = rising replacement wave).
+            </p>
+          </div>
+        )}
+
         {!interactive && (
           <div className="absolute inset-0 z-[1001] flex items-center justify-center bg-stone-900/50 p-6">
             <div className="max-w-sm rounded-xl border border-stone-200 bg-white p-6 text-center shadow-lg">
@@ -233,6 +254,14 @@ export function BloomZonesMap({
           <BasemapLayers basemap={basemap} />
           <FitBounds leads={mappable} />
           {!interactive && <LockMapInteractions locked />}
+          {forecastOverlay?.enabled && interactive ? (
+            <BloomForecastMapLayer
+              forecasts={forecastOverlay.forecasts}
+              selectedZip={forecastOverlay.selectedZip}
+              onSelectZip={forecastOverlay.onSelectZip}
+              preview={forecastOverlay.preview}
+            />
+          ) : null}
           {mappable.map((lead) => {
             const isSelected = lead.id === selectedId;
             const fillColor =

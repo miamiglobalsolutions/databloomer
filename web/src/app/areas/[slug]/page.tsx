@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { DigestSubscribe } from "@/components/digest-subscribe";
+import { NeighborhoodBloomCard } from "@/components/neighborhood-bloom-card";
+import { fetchNeighborhoodBloomForZip } from "@/lib/leads/neighborhood-bloom-server";
 import { getAreaBySlug, getAreaSlugs } from "@/lib/miami-dade/areas";
-
 const appUrl =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
 
@@ -39,6 +40,12 @@ export default async function AreaPage({ params }: PageProps) {
   const area = getAreaBySlug(slug);
   if (!area) notFound();
 
+  let bloomForecast = null;
+  try {
+    bloomForecast = await fetchNeighborhoodBloomForZip(area.zip);
+  } catch {
+    bloomForecast = null;
+  }
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -82,6 +89,10 @@ export default async function AreaPage({ params }: PageProps) {
             </li>
           ))}
         </ul>
+
+        {bloomForecast ? (
+          <NeighborhoodBloomCard forecast={bloomForecast} areaName={area.name} />
+        ) : null}
 
         <div className="mt-10 flex flex-wrap gap-4">
           <Link
