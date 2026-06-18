@@ -18,6 +18,7 @@ import { displayAddress } from "@/lib/subscription/access";
 import type { NeighborhoodBloomForecast } from "@/lib/leads/neighborhood-bloom";
 import { BloomForecastMapLayer } from "./bloom-forecast-map-layer";
 import { BloomZonesClusterLayer } from "./bloom-zones-cluster-layer";
+import { SelectedLeadMapPopup } from "./selected-lead-map-popup";
 import "leaflet/dist/leaflet.css";
 
 const MIAMI_CENTER: [number, number] = [25.7617, -80.1918];
@@ -279,6 +280,9 @@ export function BloomZonesMap({
             onSelect={onSelect}
             interactive={interactive}
           />
+          {selectedLead && interactive ? (
+            <SelectedLeadMapPopup lead={selectedLead} type={type} />
+          ) : null}
         </MapContainer>
       </div>
 
