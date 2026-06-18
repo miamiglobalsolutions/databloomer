@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
-  CircleMarker,
   MapContainer,
-  Popup,
   TileLayer,
   useMap,
 } from "react-leaflet";
@@ -14,15 +12,50 @@ import {
   BLOOM_ZONE_TIERS,
   DATABLOOM_SCORE_LABEL,
   formatDataBloomScore,
-  getBloomZoneColor,
   getBloomZoneTier,
 } from "@/lib/leads/databloom-score";
 import { displayAddress } from "@/lib/subscription/access";
 import type { NeighborhoodBloomForecast } from "@/lib/leads/neighborhood-bloom";
 import { BloomForecastMapLayer } from "./bloom-forecast-map-layer";
+import { BloomZonesClusterLayer } from "./bloom-zones-cluster-layer";
 import "leaflet/dist/leaflet.css";
 
 const MIAMI_CENTER: [number, number] = [25.7617, -80.1918];
+const FIT_BOUNDS_SAMPLE_MAX = 400;
+
+function samplePointsForBounds(
+  points: [number, number][],
+): [number, number][] {
+  if (points.length <= FIT_BOUNDS_SAMPLE_MAX) return points;
+  const step = Math.ceil(points.length / FIT_BOUNDS_SAMPLE_MAX);
+  return points.filter((_, index) => index % step === 0);
+}
+
+function FitBounds({ leads }: { leads: LeadRecord[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const points = samplePointsForBounds(
+      leads
+        .filter((l) => l.lat != null && l.lng != null)
+        .map((l) => [l.lat!, l.lng!] as [number, number]),
+    );
+
+    if (points.length === 0) {
+      map.setView(MIAMI_CENTER, 11);
+      return;
+    }
+
+    if (points.length === 1) {
+      map.setView(points[0], 15);
+      return;
+    }
+
+    map.fitBounds(points, { padding: [48, 48], maxZoom: 14 });
+  }, [leads, map]);
+
+  return null;
+}
 
 type Basemap = "street" | "satellite";
 export type BloomMapStyle = "zones" | "minimal";
@@ -42,30 +75,6 @@ const BASEMAPS = {
     attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>',
   },
 } as const;
-
-function FitBounds({ leads }: { leads: LeadRecord[] }) {
-  const map = useMap();
-
-  useEffect(() => {
-    const points = leads
-      .filter((l) => l.lat != null && l.lng != null)
-      .map((l) => [l.lat!, l.lng!] as [number, number]);
-
-    if (points.length === 0) {
-      map.setView(MIAMI_CENTER, 11);
-      return;
-    }
-
-    if (points.length === 1) {
-      map.setView(points[0], 15);
-      return;
-    }
-
-    map.fitBounds(points, { padding: [48, 48], maxZoom: 14 });
-  }, [leads, map]);
-
-  return null;
-}
 
 function LockMapInteractions({ locked }: { locked: boolean }) {
   const map = useMap();
@@ -250,6 +259,7 @@ export function BloomZonesMap({
           boxZoom={interactive}
           keyboard={interactive}
           zoomControl={interactive}
+          preferCanvas
         >
           <BasemapLayers basemap={basemap} />
           <FitBounds leads={mappable} />
@@ -262,57 +272,13 @@ export function BloomZonesMap({
               preview={forecastOverlay.preview}
             />
           ) : null}
-          {mappable.map((lead) => {
-            const isSelected = lead.id === selectedId;
-            const fillColor =
-              mapStyle === "zones"
-                ? getBloomZoneColor(lead.score)
-                : isSelected
-                  ? getBloomZoneColor(lead.score)
-                  : "#78716c";
-
-            return (
-              <CircleMarker
-                key={lead.id}
-                center={[lead.lat!, lead.lng!]}
-                radius={isSelected ? 11 : 8}
-                pathOptions={{
-                  color: isSelected ? "#1c1917" : fillColor,
-                  fillColor,
-                  fillOpacity: isSelected ? 1 : 0.9,
-                  weight: isSelected ? 3 : 1.5,
-                }}
-                eventHandlers={
-                  interactive
-                    ? { click: () => onSelect(lead.id) }
-                    : undefined
-                }
-              >
-                <Popup>
-                  <div className="min-w-[200px] text-sm">
-                    <p className="font-semibold text-stone-900">
-                      {displayAddress(lead.address)}
-                    </p>
-                    <p className="mt-1 text-stone-600">
-                      {formatDataBloomScore(lead.score)} ·{" "}
-                      {getBloomZoneTier(lead.score).label}
-                    </p>
-                    {lead.zip && (
-                      <p className="text-stone-500">ZIP {lead.zip}</p>
-                    )}
-                    {type === "aging_roof" && lead.roof_age_years != null && (
-                      <p className="mt-1 text-stone-700">
-                        Roof age: {lead.roof_age_years} yrs
-                      </p>
-                    )}
-                    <p className="mt-2 text-xs leading-snug text-stone-600">
-                      {lead.signal_summary}
-                    </p>
-                  </div>
-                </Popup>
-              </CircleMarker>
-            );
-          })}
+          <BloomZonesClusterLayer
+            leads={mappable}
+            mapStyle={mapStyle}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            interactive={interactive}
+          />
         </MapContainer>
       </div>
 
@@ -341,10 +307,12 @@ export function BloomZonesMap({
           Each pin is color-coded by {DATABLOOM_SCORE_LABEL}. Focus canvassing on
           orange and red pins. Showing {mappable.length} on map
           {missing > 0 ? ` · ${missing} without coordinates` : ""}.
+          Pins are clustered when zoomed out — zoom in to see individual leads.
           {selectedLead && (
             <span className="ml-1 font-medium text-stone-700">
               Selected: {getBloomZoneTier(selectedLead.score).label} (
-              {formatDataBloomScore(selectedLead.score)}).
+              {formatDataBloomScore(selectedLead.score)}) —{" "}
+              {displayAddress(selectedLead.address)}.
             </span>
           )}
         </p>

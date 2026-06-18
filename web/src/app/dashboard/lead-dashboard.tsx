@@ -12,7 +12,12 @@ import type { BloomZoneTier } from "@/lib/leads/databloom-score";
 import { filterLeadsByBloomZone } from "@/lib/leads/databloom-score";
 import { computeTopBloomZips } from "@/lib/leads/bloom-zips";
 import { downloadLeadsCsv } from "@/lib/leads/export-csv";
-import { LEADS_API_MAX, LEADS_ZIP_MAX } from "@/lib/leads/limits";
+import {
+  LEADS_API_MAX,
+  LEADS_MAP_MAX,
+  LEADS_MAP_ZIP_MAX,
+  LEADS_ZIP_MAX,
+} from "@/lib/leads/limits";
 import type { LeadRecord } from "@/lib/leads/types";
 import type { NeighborhoodBloomForecast } from "@/lib/leads/neighborhood-bloom";
 import { AREA_ZIP_SHORTCUTS } from "@/lib/miami-dade/areas";
@@ -94,9 +99,15 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
 
       if (zipFilter) {
         params.set("zip", zipFilter);
-        params.set("limit", String(LEADS_ZIP_MAX));
+        params.set(
+          "limit",
+          String(view === "map" ? LEADS_MAP_ZIP_MAX : LEADS_ZIP_MAX),
+        );
       } else if (fullAccess) {
-        params.set("limit", String(LEADS_API_MAX));
+        params.set(
+          "limit",
+          String(view === "map" ? LEADS_MAP_MAX : LEADS_API_MAX),
+        );
       } else if (view === "map") {
         params.set("diverse", "true");
         params.set("perZip", "2");
@@ -233,10 +244,11 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
             {loading
               ? "Loading…"
               : `${filteredLeads.length} shown${filteredLeads.length !== leads.length ? ` of ${leads.length}` : ""}`}
-            {!loading && !normalizeZipInput(zip) && view === "map" && totalLeads != null && (
+            {!loading && view === "map" && totalLeads != null && leads.length < totalLeads && (
               <span className="text-stone-400">
                 {" "}
-                · {leads.length >= totalLeads ? "full county" : `of ${totalLeads} total`}
+                · top {leads.length.toLocaleString()} pins on map (filter by ZIP for
+                full area detail)
               </span>
             )}
           </p>
