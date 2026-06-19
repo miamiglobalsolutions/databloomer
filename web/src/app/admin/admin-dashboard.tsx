@@ -152,11 +152,22 @@ export function AdminDashboard() {
   if (accessLevel !== "admin") {
     return (
       <div className="space-y-6">
+        {accessLevel === "subscriber" ? (
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            You&apos;re signed in as a subscriber. Enter your{" "}
+            <strong>admin</strong> access code below — it&apos;s different from
+            the subscriber code.
+          </p>
+        ) : null}
         <AccessLoginForm
           target="admin"
           title="Admin login"
           subtitle="Enter your admin access code to manage subscribers and digest settings."
           redirectTo="/admin"
+          onSuccess={() => {
+            setLoading(true);
+            void loadOverview();
+          }}
         />
         <p className="text-sm text-stone-500">
           <Link href="/dashboard" className="text-orange-700 hover:underline">

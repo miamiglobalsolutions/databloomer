@@ -12,10 +12,16 @@ type LoginBody = {
 function validateCode(code: string, target: "subscriber" | "admin"): AccessLevel | null {
   const adminCode = process.env.ADMIN_ACCESS_CODE?.trim();
   const subscriberCode = process.env.SUBSCRIBER_ACCESS_CODE?.trim();
-  if (target === "admin" && adminCode && code === adminCode) return "admin";
+
+  if (target === "admin") {
+    if (!adminCode) return null;
+    return code === adminCode ? "admin" : null;
+  }
+
   if (target === "subscriber" && subscriberCode && code === subscriberCode) {
     return "subscriber";
   }
+
   if (adminCode && code === adminCode) return "admin";
   if (subscriberCode && code === subscriberCode) return "subscriber";
   return null;
@@ -28,6 +34,13 @@ export async function POST(request: Request) {
     const target = body.target ?? "subscriber";
     if (!code) {
       return NextResponse.json({ error: "Access code is required." }, { status: 400 });
+    }
+
+    if (target === "admin" && !process.env.ADMIN_ACCESS_CODE?.trim()) {
+      return NextResponse.json(
+        { error: "Admin access is not configured. Set ADMIN_ACCESS_CODE in Vercel." },
+        { status: 503 },
+      );
     }
 
     const level = validateCode(code, target);

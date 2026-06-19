@@ -8,6 +8,7 @@ type Props = {
   title: string;
   subtitle?: string;
   redirectTo?: string;
+  onSuccess?: () => void;
 };
 
 export function AccessLoginForm({
@@ -15,6 +16,7 @@ export function AccessLoginForm({
   title,
   subtitle,
   redirectTo = "/dashboard?view=map",
+  onSuccess,
 }: Props) {
   const router = useRouter();
   const [code, setCode] = useState("");
@@ -34,6 +36,15 @@ export function AccessLoginForm({
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error ?? "Login failed.");
+      }
+      onSuccess?.();
+      if (
+        target === "admin" ||
+        (typeof window !== "undefined" &&
+          window.location.pathname === redirectTo.split("?")[0])
+      ) {
+        window.location.assign(redirectTo);
+        return;
       }
       router.push(redirectTo);
       router.refresh();
