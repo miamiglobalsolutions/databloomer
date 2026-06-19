@@ -117,7 +117,13 @@ export function AdminDashboard() {
         body: JSON.stringify({ email: testEmail }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Test send failed");
+      if (!res.ok) {
+        const detail =
+          Array.isArray(data.result?.errors) && data.result.errors.length > 0
+            ? ` ${data.result.errors.join(" ")}`
+            : "";
+        throw new Error((data.error ?? "Test send failed") + detail);
+      }
       setActionMessage(data.message ?? "Test digest sent.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Test send failed");
@@ -135,7 +141,13 @@ export function AdminDashboard() {
         method: "POST",
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Send failed");
+      if (!res.ok) {
+        const detail =
+          Array.isArray(data.result?.errors) && data.result.errors.length > 0
+            ? ` ${data.result.errors.join(" ")}`
+            : "";
+        throw new Error((data.error ?? "Send failed") + detail);
+      }
       setActionMessage(data.message ?? "Digest sent.");
       await loadOverview();
     } catch (err) {
@@ -233,6 +245,8 @@ export function AdminDashboard() {
         <p className="mt-1 text-sm text-stone-600">
           Cron checks daily at 14:00 UTC and sends when the selected frequency
           interval has passed. Use test send or send now to verify immediately.
+          Requires <code className="text-xs">RESEND_API_KEY</code> and a verified
+          sender in Resend (<code className="text-xs">DIGEST_FROM_EMAIL</code>).
         </p>
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">

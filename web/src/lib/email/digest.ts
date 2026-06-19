@@ -86,31 +86,85 @@ export async function sendWeeklyDigestEmail(options: {
   return { sent: true };
 }
 
+/** Admin test — sends to any address without digest enrollment. */
+export async function sendDigestTestEmail(
+  to: string,
+): Promise<{ sent: boolean; reason?: string }> {
+  const zips = await fetchTopBloomZipsFromDb("aging_roof", 5);
+  return sendWeeklyDigestEmail({ to: to.trim().toLowerCase(), zips });
+}
+
+type DigestRecipient = {
+  id?: number;
+  email: string;
+};
+
+async function getDigestRecipients(options?: {
+  onlyEmail?: string;
+  audience?: "digest" | "paid";
+}): Promise<DigestRecipient[]> {
+  const { query } = await import("@/lib/db/client");
+
+  if (options?.onlyEmail) {
+    return [{ email: options.onlyEmail.trim().toLowerCase() }];
+  }
+
+  if (options?.audience === "paid") {
+    const paid = await query<{ email: string }>(
+      `SELECT email
+       FROM stripe_subscribers
+       WHERE status IN ('active', 'trialing')
+         AND (current_period_end IS NULL OR current_period_end > NOW())
+       ORDER BY email`,
+    );
+    return paid.rows.map((row) => ({ email: row.email }));
+  }
+
+  const subs = await query<{ id: number; email: string }>(
+    `SELECT id, email FROM digest_subscribers WHERE active = TRUE ORDER BY email`,
+  );
+  return subs.rows.map((row) => ({ id: row.id, email: row.email }));
+}
+
 export async function runWeeklyDigest(options?: {
   onlyEmail?: string;
   updateSchedule?: boolean;
   skipStripeCheck?: boolean;
+  /** When digest list is empty, admin send can target all paid Stripe subscribers. */
+  audience?: "digest" | "paid";
 }): Promise<{
   subscribers: number;
   sent: number;
   skipped: number;
   errors: string[];
+  audience: "digest" | "paid";
 }> {
   const { query } = await import("@/lib/db/client");
   const zips = await fetchTopBloomZipsFromDb("aging_roof", 5);
 
-  const subs = await query<{ id: number; email: string }>(
-    options?.onlyEmail
-      ? `SELECT id, email FROM digest_subscribers WHERE active = TRUE AND email = $1`
-      : `SELECT id, email FROM digest_subscribers WHERE active = TRUE`,
-    options?.onlyEmail ? [options.onlyEmail.trim().toLowerCase()] : [],
-  );
+  let audience: "digest" | "paid" = options?.audience ?? "digest";
+  let recipients = await getDigestRecipients({
+    onlyEmail: options?.onlyEmail,
+    audience: options?.audience,
+  });
+
+  if (recipients.length === 0 && audience === "digest" && !options?.onlyEmail) {
+    audience = "paid";
+    recipients = await getDigestRecipients({ audience: "paid" });
+  }
 
   let sent = 0;
   let skipped = 0;
   const errors: string[] = [];
 
-  for (const sub of subs.rows) {
+  if (recipients.length === 0) {
+    errors.push(
+      "No recipients found. Enroll paid subscribers in the digest on the dashboard, or confirm stripe_subscribers has active rows.",
+    );
+    return { subscribers: 0, sent, skipped, errors, audience };
+  }
+
+  for (const sub of recipients) {
     if (
       !options?.skipStripeCheck &&
       !(await isActiveStripeSubscriber(sub.email))
@@ -123,10 +177,12 @@ export async function runWeeklyDigest(options?: {
     const result = await sendWeeklyDigestEmail({ to: sub.email, zips });
     if (result.sent) {
       sent += 1;
-      await query(
-        `UPDATE digest_subscribers SET last_sent_at = NOW() WHERE id = $1`,
-        [sub.id],
-      );
+      if (sub.id != null) {
+        await query(
+          `UPDATE digest_subscribers SET last_sent_at = NOW() WHERE id = $1`,
+          [sub.id],
+        );
+      }
     } else {
       skipped += 1;
       if (result.reason) errors.push(`${sub.email}: ${result.reason}`);
@@ -138,9 +194,10 @@ export async function runWeeklyDigest(options?: {
   }
 
   return {
-    subscribers: subs.rows.length,
+    subscribers: recipients.length,
     sent,
     skipped,
     errors,
+    audience,
   };
 }

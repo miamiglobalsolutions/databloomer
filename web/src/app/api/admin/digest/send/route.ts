@@ -12,14 +12,40 @@ export async function POST(request: Request) {
   if (!admin.ok) return admin.response;
 
   try {
-    const result = await runWeeklyDigest({ updateSchedule: false });
+    const result = await runWeeklyDigest({
+      updateSchedule: false,
+      skipStripeCheck: true,
+      audience: "digest",
+    });
+
     if (result.sent > 0) {
       await markDigestRunComplete();
     }
 
+    const detail =
+      result.errors.length > 0 ? ` ${result.errors.join(" ")}` : "";
+
+    if (result.sent === 0) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            result.errors[0] ??
+            "No digest emails were sent. Check RESEND_API_KEY and recipient list.",
+          result,
+        },
+        { status: 500 },
+      );
+    }
+
+    const audienceNote =
+      result.audience === "paid"
+        ? " (no digest enrollees — sent to active paid Stripe subscribers)"
+        : "";
+
     return NextResponse.json({
       ok: true,
-      message: `Digest sent to ${result.sent} subscriber(s).`,
+      message: `Digest sent to ${result.sent} subscriber(s)${audienceNote}.${detail}`,
       result,
     });
   } catch (error) {

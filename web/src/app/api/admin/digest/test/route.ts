@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { requireAdminAccess } from "@/lib/admin/require-admin";
-import { runWeeklyDigest } from "@/lib/email/digest";
+import { sendDigestTestEmail } from "@/lib/email/digest";
 
 export const maxDuration = 60;
 
@@ -23,18 +23,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await runWeeklyDigest({
-      onlyEmail: email,
-      updateSchedule: false,
-      skipStripeCheck: true,
-    });
+    const result = await sendDigestTestEmail(email);
 
-    if (result.sent === 0) {
+    if (!result.sent) {
       return NextResponse.json(
         {
           ok: false,
-          error: result.errors[0] ?? "Test email could not be sent.",
-          result,
+          error: result.reason ?? "Test email could not be sent.",
         },
         { status: 500 },
       );
@@ -43,7 +38,6 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       message: `Test digest sent to ${email}.`,
-      result,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Test send failed";
