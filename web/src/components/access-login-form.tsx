@@ -7,9 +7,15 @@ type Props = {
   target?: "subscriber" | "admin";
   title: string;
   subtitle?: string;
+  redirectTo?: string;
 };
 
-export function AccessLoginForm({ target = "subscriber", title, subtitle }: Props) {
+export function AccessLoginForm({
+  target = "subscriber",
+  title,
+  subtitle,
+  redirectTo = "/dashboard?view=map",
+}: Props) {
   const router = useRouter();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,7 +35,7 @@ export function AccessLoginForm({ target = "subscriber", title, subtitle }: Prop
       if (!res.ok) {
         throw new Error(data.error ?? "Login failed.");
       }
-      router.push("/dashboard?view=map");
+      router.push(redirectTo);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");

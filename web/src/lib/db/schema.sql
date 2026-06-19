@@ -137,6 +137,18 @@ CREATE TABLE IF NOT EXISTS digest_subscribers (
 
 CREATE INDEX IF NOT EXISTS idx_digest_subscribers_active ON digest_subscribers (active);
 
+CREATE TABLE IF NOT EXISTS digest_settings (
+  id              INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  enabled         BOOLEAN NOT NULL DEFAULT TRUE,
+  frequency       TEXT NOT NULL DEFAULT 'weekly',
+  last_run_at     TIMESTAMPTZ,
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO digest_settings (id, enabled, frequency)
+VALUES (1, TRUE, 'weekly')
+ON CONFLICT (id) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS ingest_state (
   key         TEXT PRIMARY KEY,
   value       TEXT NOT NULL,

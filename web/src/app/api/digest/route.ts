@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { runWeeklyDigest } from "@/lib/email/digest";
+import { isDigestDue } from "@/lib/email/digest-schedule";
+import { getDigestSettings } from "@/lib/email/digest-settings";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -20,8 +22,26 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await runWeeklyDigest();
-    return NextResponse.json(result);
+    const settings = await getDigestSettings();
+
+    if (!settings.enabled) {
+      return NextResponse.json({
+        skipped: true,
+        reason: "Digest is disabled in admin settings",
+        settings,
+      });
+    }
+
+    if (!isDigestDue(settings.lastRunAt, settings.frequency)) {
+      return NextResponse.json({
+        skipped: true,
+        reason: `Not due yet for ${settings.frequency} schedule`,
+        settings,
+      });
+    }
+
+    const result = await runWeeklyDigest({ updateSchedule: true });
+    return NextResponse.json({ ...result, settings });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Digest failed";
     return NextResponse.json({ error: message }, { status: 500 });

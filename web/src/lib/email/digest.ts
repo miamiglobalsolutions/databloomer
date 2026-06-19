@@ -1,4 +1,6 @@
 import { fetchTopBloomZipsFromDb } from "@/lib/leads/bloom-zips-server";
+import { isActiveStripeSubscriber } from "@/lib/subscription/stripe-subscribers";
+import { markDigestRunComplete } from "@/lib/email/digest-settings";
 
 const appUrl =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
@@ -21,8 +23,8 @@ function buildDigestHtml(
 
   return `
     <div style="font-family:sans-serif;max-width:560px;color:#1c1917;">
-      <h1 style="color:#ea580c;">DataBloomer — Weekly Bloom Zones</h1>
-      <p>Top Miami-Dade ZIP codes for canvassing this week, ranked by DataBloom Score.</p>
+      <h1 style="color:#ea580c;">DataBloomer — Bloom Zone digest</h1>
+      <p>Top Miami-Dade ZIP codes for canvassing, ranked by DataBloom Score.</p>
       <table style="width:100%;border-collapse:collapse;margin:16px 0;">
         <thead>
           <tr style="background:#fafaf9;text-align:left;">
@@ -36,7 +38,7 @@ function buildDigestHtml(
         <tbody>${rows}</tbody>
       </table>
       <p><a href="${appUrl}/dashboard?view=map" style="color:#ea580c;">Open Bloom Zones map →</a></p>
-      <p style="font-size:12px;color:#78716c;">You're receiving this because you subscribed at ${appUrl}</p>
+      <p style="font-size:12px;color:#78716c;">You're receiving this as a DataBloomer subscriber at ${appUrl}</p>
     </div>
   `;
 }
@@ -70,9 +72,9 @@ export async function sendWeeklyDigestEmail(options: {
     body: JSON.stringify({
       from,
       to: [options.to],
-      subject: "Your weekly DataBloomer Bloom Zone digest",
+      subject: "Your DataBloomer Bloom Zone digest",
       html,
-      text: `Top Bloom ZIPs this week:\n\n${text}\n\n${appUrl}/dashboard?view=map`,
+      text: `Top Bloom ZIPs:\n\n${text}\n\n${appUrl}/dashboard?view=map`,
     }),
   });
 
@@ -84,7 +86,11 @@ export async function sendWeeklyDigestEmail(options: {
   return { sent: true };
 }
 
-export async function runWeeklyDigest(): Promise<{
+export async function runWeeklyDigest(options?: {
+  onlyEmail?: string;
+  updateSchedule?: boolean;
+  skipStripeCheck?: boolean;
+}): Promise<{
   subscribers: number;
   sent: number;
   skipped: number;
@@ -94,7 +100,10 @@ export async function runWeeklyDigest(): Promise<{
   const zips = await fetchTopBloomZipsFromDb("aging_roof", 5);
 
   const subs = await query<{ id: number; email: string }>(
-    `SELECT id, email FROM digest_subscribers WHERE active = TRUE`,
+    options?.onlyEmail
+      ? `SELECT id, email FROM digest_subscribers WHERE active = TRUE AND email = $1`
+      : `SELECT id, email FROM digest_subscribers WHERE active = TRUE`,
+    options?.onlyEmail ? [options.onlyEmail.trim().toLowerCase()] : [],
   );
 
   let sent = 0;
@@ -102,16 +111,30 @@ export async function runWeeklyDigest(): Promise<{
   const errors: string[] = [];
 
   for (const sub of subs.rows) {
+    if (
+      !options?.skipStripeCheck &&
+      !(await isActiveStripeSubscriber(sub.email))
+    ) {
+      skipped += 1;
+      errors.push(`${sub.email}: not an active paid subscriber`);
+      continue;
+    }
+
     const result = await sendWeeklyDigestEmail({ to: sub.email, zips });
     if (result.sent) {
       sent += 1;
-      await query(`UPDATE digest_subscribers SET last_sent_at = NOW() WHERE id = $1`, [
-        sub.id,
-      ]);
+      await query(
+        `UPDATE digest_subscribers SET last_sent_at = NOW() WHERE id = $1`,
+        [sub.id],
+      );
     } else {
       skipped += 1;
       if (result.reason) errors.push(`${sub.email}: ${result.reason}`);
     }
+  }
+
+  if (!options?.onlyEmail && options?.updateSchedule !== false && sent > 0) {
+    await markDigestRunComplete();
   }
 
   return {

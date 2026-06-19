@@ -99,6 +99,11 @@ export async function handleSubscriptionDeleted(
     status: "canceled",
     currentPeriodEnd: periodEndFromSubscription(subscription),
   });
+
+  const { query } = await import("@/lib/db/client");
+  await query(`UPDATE digest_subscribers SET active = FALSE WHERE email = $1`, [
+    email.trim().toLowerCase(),
+  ]);
 }
 
 export { isActiveSubscriptionStatus };
