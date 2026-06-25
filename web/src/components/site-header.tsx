@@ -4,7 +4,7 @@ import { DataBloomerLogoMark } from "./databloomer-logo-mark";
 import { SubscriptionBenefitsBar } from "./subscription-benefits-bar";
 
 type Props = {
-  active?: "home" | "about" | "subscribe" | "dashboard" | "contact" | "help";
+  active?: "home" | "about" | "promo" | "subscribe" | "dashboard" | "contact" | "help";
   showBenefitsBar?: boolean;
 };
 
@@ -19,6 +19,9 @@ export function SiteHeader({ active, showBenefitsBar = active !== "subscribe" }:
         <nav className="flex flex-wrap items-center gap-2">
           <NavLink href="/about" active={active === "about"}>
             About
+          </NavLink>
+          <NavLink href="/promo" active={active === "promo"}>
+            Watch
           </NavLink>
           <NavLink href="/contact" active={active === "contact"}>
             Contact

@@ -38,6 +38,12 @@ export default function HomePage() {
             View lead list
           </Link>
           <Link
+            href="/promo"
+            className="rounded-lg border border-stone-300 bg-white px-6 py-3 font-medium text-stone-800 hover:bg-stone-50"
+          >
+            Watch 40s overview
+          </Link>
+          <Link
             href="/subscribe"
             className="rounded-lg border border-orange-300 bg-orange-50 px-6 py-3 font-medium text-orange-900 hover:bg-orange-100"
           >

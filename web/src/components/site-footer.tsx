@@ -35,6 +35,7 @@ export function SiteFooter() {
               <FooterLink href="/dashboard?type=aging_roof">Aging roof leads</FooterLink>
               <FooterLink href="/subscribe">Subscribe</FooterLink>
               <FooterLink href="/about">About</FooterLink>
+              <FooterLink href="/promo">Watch promo</FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>
               <FooterLink href="/help">Subscriber help</FooterLink>
             </ul>
