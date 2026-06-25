@@ -5,6 +5,10 @@ import {
   ROOF_RELATED_VIOLATION_DESC_PATTERNS,
   VIOLATIONS_OPEN_ONLY,
 } from "./constants";
+import {
+  resolvePropertyAssessedValue,
+  type AssessedValueSource,
+} from "./property-value";
 
 type ArcGISGeometry =
   | { x: number; y: number }
@@ -107,9 +111,14 @@ type ParcelAttributes = {
   TRUE_SITE_ZIP_CODE?: string;
   YEAR_BUILT?: number;
   TOTAL_VAL_CUR?: number | null;
+  BUILDING_HEATED_AREA?: number | null;
+  BUILDING_EFFECTIVE_AREA?: number | null;
   X_COORD?: number;
   Y_COORD?: number;
 };
+
+const PARCEL_OUT_FIELDS =
+  "FOLIO,TRUE_SITE_ADDR,TRUE_SITE_CITY,TRUE_SITE_ZIP_CODE,YEAR_BUILT,TOTAL_VAL_CUR,BUILDING_HEATED_AREA,BUILDING_EFFECTIVE_AREA,X_COORD,Y_COORD";
 
 function arcgisDateToDate(value?: number): Date | null {
   if (value == null) return null;
@@ -164,7 +173,11 @@ function parseParcelFeature(
       ? { lng: attrs.X_COORD, lat: attrs.Y_COORD }
       : null);
 
-  const assessed = attrs.TOTAL_VAL_CUR;
+  const assessed = resolvePropertyAssessedValue({
+    totalValCur: attrs.TOTAL_VAL_CUR,
+    buildingHeatedArea: attrs.BUILDING_HEATED_AREA,
+    buildingEffectiveArea: attrs.BUILDING_EFFECTIVE_AREA,
+  });
 
   return {
     folio,
@@ -172,7 +185,9 @@ function parseParcelFeature(
     city: attrs.TRUE_SITE_CITY?.trim() ?? "Miami",
     zip: normalizeZip(attrs.TRUE_SITE_ZIP_CODE),
     year_built: attrs.YEAR_BUILT && attrs.YEAR_BUILT > 0 ? attrs.YEAR_BUILT : null,
-    assessed_value: assessed != null && Number.isFinite(assessed) ? Number(assessed) : null,
+    assessed_value: assessed.assessed_value,
+    assessed_value_source: assessed.assessed_value_source,
+    building_heated_area: assessed.building_heated_area,
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
   };
@@ -229,6 +244,8 @@ export type ParsedProperty = {
   zip: string | null;
   year_built: number | null;
   assessed_value: number | null;
+  assessed_value_source?: AssessedValueSource | null;
+  building_heated_area?: number | null;
   lat: number | null;
   lng: number | null;
 };
@@ -388,8 +405,7 @@ export async function fetchPropertiesByYearBuilt(options: {
     ARCGIS.parcels,
     {
       where: AGING_PROPERTY_FILTER(minYearBuilt, maxYearBuilt),
-      outFields:
-        "FOLIO,TRUE_SITE_ADDR,TRUE_SITE_CITY,TRUE_SITE_ZIP_CODE,YEAR_BUILT,TOTAL_VAL_CUR,X_COORD,Y_COORD",
+      outFields: PARCEL_OUT_FIELDS,
       returnGeometry: "true",
       outSR: "4326",
       f: "json",
@@ -416,8 +432,7 @@ export async function fetchAgingPropertiesByZip(
     ARCGIS.parcels,
     {
       where: `${AGING_PROPERTY_FILTER(minYearBuilt, maxYearBuilt)} AND TRUE_SITE_ZIP_CODE LIKE '${zip}%'`,
-      outFields:
-        "FOLIO,TRUE_SITE_ADDR,TRUE_SITE_CITY,TRUE_SITE_ZIP_CODE,YEAR_BUILT,TOTAL_VAL_CUR,X_COORD,Y_COORD",
+      outFields: PARCEL_OUT_FIELDS,
       returnGeometry: "true",
       outSR: "4326",
       f: "json",

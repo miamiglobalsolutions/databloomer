@@ -56,8 +56,13 @@ async function upsertPropertiesBatch(
   for (let offset = 0; offset < rows.length; offset += PROPERTY_UPSERT_BATCH) {
     const chunk = rows.slice(offset, offset + PROPERTY_UPSERT_BATCH);
     await q(
-      `INSERT INTO properties (folio, address, city, zip, year_built, assessed_value, lat, lng, updated_at)
-       SELECT u.folio, u.address, u.city, u.zip, u.year_built, u.assessed_value, u.lat, u.lng, NOW()
+      `INSERT INTO properties (
+         folio, address, city, zip, year_built, assessed_value,
+         building_heated_area, assessed_value_source, lat, lng, updated_at
+       )
+       SELECT
+         u.folio, u.address, u.city, u.zip, u.year_built, u.assessed_value,
+         u.building_heated_area, u.assessed_value_source, u.lat, u.lng, NOW()
        FROM UNNEST(
          $1::text[],
          $2::text[],
@@ -65,17 +70,33 @@ async function upsertPropertiesBatch(
          $4::text[],
          $5::int[],
          $6::numeric[],
-         $7::float8[],
-         $8::float8[]
+         $7::int[],
+         $8::text[],
+         $9::float8[],
+         $10::float8[]
        ) AS u(
-         folio, address, city, zip, year_built, assessed_value, lat, lng
+         folio, address, city, zip, year_built, assessed_value,
+         building_heated_area, assessed_value_source, lat, lng
        )
        ON CONFLICT (folio) DO UPDATE SET
          address = EXCLUDED.address,
          city = EXCLUDED.city,
          zip = EXCLUDED.zip,
          year_built = EXCLUDED.year_built,
-         assessed_value = EXCLUDED.assessed_value,
+         assessed_value = CASE
+           WHEN EXCLUDED.assessed_value_source = 'county' THEN EXCLUDED.assessed_value
+           WHEN properties.assessed_value_source = 'county' THEN properties.assessed_value
+           ELSE EXCLUDED.assessed_value
+         END,
+         building_heated_area = COALESCE(
+           EXCLUDED.building_heated_area,
+           properties.building_heated_area
+         ),
+         assessed_value_source = CASE
+           WHEN EXCLUDED.assessed_value_source = 'county' THEN EXCLUDED.assessed_value_source
+           WHEN properties.assessed_value_source = 'county' THEN properties.assessed_value_source
+           ELSE EXCLUDED.assessed_value_source
+         END,
          lat = COALESCE(EXCLUDED.lat, properties.lat),
          lng = COALESCE(EXCLUDED.lng, properties.lng),
          updated_at = NOW()`,
@@ -86,6 +107,8 @@ async function upsertPropertiesBatch(
         chunk.map((p) => p.zip),
         chunk.map((p) => p.year_built),
         chunk.map((p) => p.assessed_value),
+        chunk.map((p) => p.building_heated_area ?? null),
+        chunk.map((p) => p.assessed_value_source ?? null),
         chunk.map((p) => p.lat),
         chunk.map((p) => p.lng),
       ],
@@ -521,5 +544,34 @@ export async function seedSampleData(): Promise<IngestSummary> {
     violations: 1,
     shovelsPermits: 0,
     shovelsConfigured: shovelsConfigured(),
+  };
+}
+
+/** Re-fetch parcel GIS data and upsert assessed values (heated-area estimates). */
+export async function backfillPropertyValuesFromGis(options?: {
+  zipCodes?: readonly string[];
+  maxPerZip?: number;
+  log?: (message: string) => void;
+}): Promise<{ propertiesUpserted: number; zipsProcessed: number }> {
+  const config = getAgingRoofConfig();
+  const zipCodes = [...(options?.zipCodes ?? MIAMI_DADE_ZIP_CODES)];
+  const maxPerZip = options?.maxPerZip ?? DEFAULT_MAX_PER_ZIP;
+  const log = options?.log ?? ((message: string) => console.log(message));
+  const targetMinYear = config.currentYear - config.maxAgeYears;
+  const targetMaxYear = config.currentYear - config.minAgeYears;
+  const seenFolios = new Set<string>();
+
+  const propertiesUpserted = await ingestPropertiesByZip({
+    zipCodes,
+    targetMinYear,
+    targetMaxYear,
+    maxPerZip,
+    seenFolios,
+    log,
+  });
+
+  return {
+    propertiesUpserted,
+    zipsProcessed: zipCodes.length,
   };
 }

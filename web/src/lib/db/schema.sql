@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS properties (
   zip             TEXT,
   year_built      INTEGER,
   assessed_value  NUMERIC,
+  building_heated_area INTEGER,
+  assessed_value_source TEXT,
   lat             DOUBLE PRECISION,
   lng             DOUBLE PRECISION,
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -167,3 +169,6 @@ CREATE TABLE IF NOT EXISTS stripe_subscribers (
 );
 
 CREATE INDEX IF NOT EXISTS idx_stripe_subscribers_status ON stripe_subscribers (status);
+
+ALTER TABLE properties ADD COLUMN IF NOT EXISTS building_heated_area INTEGER;
+ALTER TABLE properties ADD COLUMN IF NOT EXISTS assessed_value_source TEXT;

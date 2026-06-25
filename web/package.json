@@ -10,7 +10,8 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "ingest": "tsx scripts/ingest.ts",
     "ingest:sample": "tsx scripts/ingest.ts --sample",
-    "leads:refresh": "tsx scripts/refresh-leads.ts"
+    "leads:refresh": "tsx scripts/refresh-leads.ts",
+    "backfill:property-values": "tsx scripts/backfill-property-values.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.14",
