@@ -1,5 +1,6 @@
 "use client";
 
+import { EstimatedJobValue } from "@/components/estimated-job-value";
 import { CircleMarker, Popup } from "react-leaflet";
 import type { LeadRecord } from "@/lib/leads/types";
 import {
@@ -25,6 +26,16 @@ function PopupBody({ lead, type }: Props) {
       {lead.zip ? <p className="text-stone-500">ZIP {lead.zip}</p> : null}
       {type === "aging_roof" && lead.roof_age_years != null ? (
         <p className="mt-1 text-stone-700">Roof age: {lead.roof_age_years} yrs</p>
+      ) : null}
+      {lead.estimated_job_value != null ? (
+        <div className="mt-2">
+          <EstimatedJobValue
+            value={lead.estimated_job_value}
+            heatedSqft={lead.building_heated_area}
+            compact
+            showDisclaimer={false}
+          />
+        </div>
       ) : null}
       <p className="mt-2 text-xs leading-snug text-stone-600">
         {lead.signal_summary}

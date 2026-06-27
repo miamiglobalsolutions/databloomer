@@ -53,7 +53,7 @@ export default function HomePage() {
       </section>
 
       <section className="border-t border-stone-200 bg-white">
-        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-16 sm:grid-cols-3">
+        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-16 sm:grid-cols-2 lg:grid-cols-4">
           <FeatureCard
             title="Interactive Map View"
             body="Subscribers zoom and pan color-coded Bloom Zone pins from green to red by DataBloom Score — see exactly where to send canvassers."
@@ -61,6 +61,10 @@ export default function HomePage() {
           <FeatureCard
             title="DataBloom Score"
             body="Every lead ranked 0–100 by roof age, home value, and permit confidence so your sales team works the best prospects first."
+          />
+          <FeatureCard
+            title="Estimated job value"
+            body="Compare projected re-roof size on every lead from county heated area — a guide to weigh bigger jobs vs smaller ones, not a binding quote."
           />
           <FeatureCard
             title="Code violations"

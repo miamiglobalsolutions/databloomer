@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS leads (
   last_roof_date      DATE,
   year_built          INTEGER,
   assessed_value      NUMERIC,
+  building_heated_area INTEGER,
   violation_case      TEXT,
   violation_desc      TEXT,
   signal_summary      TEXT NOT NULL,
@@ -172,3 +173,4 @@ CREATE INDEX IF NOT EXISTS idx_stripe_subscribers_status ON stripe_subscribers (
 
 ALTER TABLE properties ADD COLUMN IF NOT EXISTS building_heated_area INTEGER;
 ALTER TABLE properties ADD COLUMN IF NOT EXISTS assessed_value_source TEXT;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS building_heated_area INTEGER;

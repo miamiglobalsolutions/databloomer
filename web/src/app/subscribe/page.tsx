@@ -16,7 +16,7 @@ const appUrl =
 export const metadata: Metadata = {
   title: "Subscribe — What You Get with DataBloomer",
   description:
-    "Unlimited Miami-Dade roofing leads, full addresses, folio numbers, Bloom Zones, and weekly email lead updates for subscribers.",
+    "Unlimited Miami-Dade roofing leads, full addresses, folio numbers, Bloom Zones, estimated job values, and weekly email lead updates for subscribers.",
   keywords: [
     "Miami roofing leads subscription",
     "roofing contractor lead service",
@@ -153,6 +153,11 @@ export default function SubscribePage() {
                   paid="✓ Full folio"
                 />
                 <CompareRow
+                  feature="Estimated job value"
+                  free="Hidden"
+                  paid="✓ Relative job size guide"
+                />
+                <CompareRow
                   feature="Top Bloom ZIPs"
                   free="✓ Rankings"
                   paid="✓ Rankings"
@@ -170,6 +175,18 @@ export default function SubscribePage() {
               </tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      <section className="border-t border-stone-200 bg-white">
+        <div className="mx-auto max-w-4xl px-6 py-10">
+          <p className="text-sm leading-relaxed text-stone-600">
+            <strong className="text-stone-800">About estimated job values:</strong>{" "}
+            Projected re-roof figures are derived from county heated living area
+            and a default cost-per-square-foot rate. They are not binding quotes
+            — use them only to compare relative job size between leads when
+            planning canvassing and sales priorities.
+          </p>
         </div>
       </section>
 

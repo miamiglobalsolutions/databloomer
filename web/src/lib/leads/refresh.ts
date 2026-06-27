@@ -1,6 +1,5 @@
 import { evaluateAgingRoof, type AgingRoofCandidate } from "@/lib/leads/aging-roof";
-import { getAgingRoofConfig, type PropertyRow } from "@/lib/leads/types";
-import { query } from "@/lib/db/client";
+import { getAgingRoofConfig, type PropertyRow } from "@/lib/leads/types";import { query } from "@/lib/db/client";
 
 const LEAD_UPSERT_BATCH = 200;
 
@@ -24,6 +23,7 @@ async function upsertAgingLeadBatch(candidates: AgingRoofCandidate[]): Promise<v
     const lastRoofDates = chunk.map((c) => formatDate(c.last_roof_date));
     const yearBuilts = chunk.map((c) => c.year_built);
     const assessedValues = chunk.map((c) => c.assessed_value);
+    const heatedAreas = chunk.map((c) => c.building_heated_area);
     const summaries = chunk.map((c) => c.signal_summary);
     const lats = chunk.map((c) => c.lat);
     const lngs = chunk.map((c) => c.lng);
@@ -32,11 +32,13 @@ async function upsertAgingLeadBatch(candidates: AgingRoofCandidate[]): Promise<v
       `INSERT INTO leads (
         id, lead_type, folio, address, zip, score, confidence,
         roof_age_years, last_roof_date, year_built, assessed_value,
+        building_heated_area,
         violation_case, violation_desc, signal_summary, lat, lng, computed_at
       )
       SELECT
         u.id, 'aging_roof', u.folio, u.address, u.zip, u.score, u.confidence::lead_confidence,
         u.roof_age_years, u.last_roof_date::date, u.year_built, u.assessed_value,
+        u.building_heated_area,
         NULL, NULL, u.signal_summary, u.lat, u.lng, NOW()
       FROM UNNEST(
         $1::text[],
@@ -49,12 +51,14 @@ async function upsertAgingLeadBatch(candidates: AgingRoofCandidate[]): Promise<v
         $8::text[],
         $9::int[],
         $10::numeric[],
-        $11::text[],
-        $12::float8[],
-        $13::float8[]
+        $11::int[],
+        $12::text[],
+        $13::float8[],
+        $14::float8[]
       ) AS u(
         id, folio, address, zip, score, confidence,
         roof_age_years, last_roof_date, year_built, assessed_value,
+        building_heated_area,
         signal_summary, lat, lng
       )
       ON CONFLICT (lead_type, folio) DO UPDATE SET
@@ -66,6 +70,7 @@ async function upsertAgingLeadBatch(candidates: AgingRoofCandidate[]): Promise<v
         last_roof_date = EXCLUDED.last_roof_date,
         year_built = EXCLUDED.year_built,
         assessed_value = EXCLUDED.assessed_value,
+        building_heated_area = EXCLUDED.building_heated_area,
         signal_summary = EXCLUDED.signal_summary,
         lat = EXCLUDED.lat,
         lng = EXCLUDED.lng,
@@ -81,6 +86,7 @@ async function upsertAgingLeadBatch(candidates: AgingRoofCandidate[]): Promise<v
         lastRoofDates,
         yearBuilts,
         assessedValues,
+        heatedAreas,
         summaries,
         lats,
         lngs,
@@ -94,7 +100,8 @@ export async function refreshAgingRoofLeads(): Promise<number> {
 
   const [properties, permitsResult] = await Promise.all([
     query<PropertyRow>(
-      `SELECT folio, address, city, zip, year_built, assessed_value, lat, lng
+      `SELECT folio, address, city, zip, year_built, assessed_value,
+              building_heated_area, lat, lng
        FROM properties`,
     ),
     query<{
@@ -162,10 +169,13 @@ export async function refreshViolationLeads(): Promise<number> {
     status_desc: string | null;
     lat: number | null;
     lng: number | null;
+    building_heated_area: number | null;
   }>(
-    `SELECT id, folio, case_number, address, case_date, problem_desc, status_desc, lat, lng
-     FROM code_violations
-     WHERE problem_desc IS NOT NULL`,
+    `SELECT v.id, v.folio, v.case_number, v.address, v.case_date, v.problem_desc,
+            v.status_desc, v.lat, v.lng, p.building_heated_area
+     FROM code_violations v
+     LEFT JOIN properties p ON p.folio = v.folio
+     WHERE v.problem_desc IS NOT NULL`,
   );
 
   let upserted = 0;
@@ -188,14 +198,16 @@ export async function refreshViolationLeads(): Promise<number> {
       `INSERT INTO leads (
         id, lead_type, folio, address, zip, score, confidence,
         roof_age_years, last_roof_date, year_built, assessed_value,
+        building_heated_area,
         violation_case, violation_desc, signal_summary, lat, lng, computed_at
       ) VALUES (
         $1, 'code_violation', $2, $3, NULL, $4, 'high',
-        NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, $10,
         $5, $6, $7, $8, $9, NOW()
       )
       ON CONFLICT (lead_type, folio) DO UPDATE SET
         score = EXCLUDED.score,
+        building_heated_area = EXCLUDED.building_heated_area,
         violation_case = EXCLUDED.violation_case,
         violation_desc = EXCLUDED.violation_desc,
         signal_summary = EXCLUDED.signal_summary,
@@ -210,6 +222,7 @@ export async function refreshViolationLeads(): Promise<number> {
         `Code violation: ${v.problem_desc ?? "roof-related"}`,
         v.lat,
         v.lng,
+        v.building_heated_area,
       ],
     );
     upserted += 1;
@@ -230,9 +243,11 @@ export async function refreshConstructionLeads(): Promise<number> {
     issue_date: Date;
     lat: number | null;
     lng: number | null;
+    building_heated_area: number | null;
   }>(
     `SELECT cp.id, cp.address, cp.permit_number, cp.process_number, cp.permit_type,
-            cp.permit_desc, cp.contractor_name, cp.issue_date, p.lat, p.lng
+            cp.permit_desc, cp.contractor_name, cp.issue_date, p.lat, p.lng,
+            p.building_heated_area
      FROM construction_permits cp
      LEFT JOIN properties p ON p.folio = cp.folio`,
   );
@@ -253,15 +268,17 @@ export async function refreshConstructionLeads(): Promise<number> {
       `INSERT INTO leads (
         id, lead_type, folio, address, zip, score, confidence,
         roof_age_years, last_roof_date, year_built, assessed_value,
+        building_heated_area,
         violation_case, violation_desc, signal_summary, lat, lng, computed_at
       ) VALUES (
         $1, 'new_construction', NULL, $2, NULL, $3, 'high',
-        NULL, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, $9,
         $4, $5, $6, $7, $8, NOW()
       )
       ON CONFLICT (id) DO UPDATE SET
         address = EXCLUDED.address,
         score = EXCLUDED.score,
+        building_heated_area = EXCLUDED.building_heated_area,
         violation_case = EXCLUDED.violation_case,
         violation_desc = EXCLUDED.violation_desc,
         signal_summary = EXCLUDED.signal_summary,
@@ -283,6 +300,7 @@ export async function refreshConstructionLeads(): Promise<number> {
         } permit${p.contractor_name ? ` · Builder: ${p.contractor_name}` : ""}${p.permit_desc ? ` · ${p.permit_desc}` : ""}`,
         p.lat,
         p.lng,
+        p.building_heated_area,
       ],
     );
     upserted += 1;

@@ -1,3 +1,4 @@
+import { EstimatedJobValue } from "@/components/estimated-job-value";
 import Link from "next/link";
 import type { LeadRecord } from "@/lib/leads/types";
 import {
@@ -85,32 +86,52 @@ export function LeadCard({
       )}
 
       {type === "aging_roof" && !compact && (
-        <dl className="mt-4 grid grid-cols-2 gap-2 text-xs text-stone-600">
-          <div>
-            <dt className="font-medium text-stone-500">Roof age</dt>
-            <dd>{lead.roof_age_years != null ? `${lead.roof_age_years} yrs` : "—"}</dd>
+        <>
+          <dl className="mt-4 grid grid-cols-2 gap-2 text-xs text-stone-600">
+            <div>
+              <dt className="font-medium text-stone-500">Roof age</dt>
+              <dd>{lead.roof_age_years != null ? `${lead.roof_age_years} yrs` : "—"}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-stone-500">Last roof / built</dt>
+              <dd>
+                {lead.last_roof_date
+                  ? new Date(lead.last_roof_date).getFullYear()
+                  : lead.year_built ?? "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-medium text-stone-500">Year built</dt>
+              <dd>{lead.year_built ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-stone-500">Assessed value</dt>
+              <dd>
+                {lead.assessed_value != null
+                  ? `$${Number(lead.assessed_value).toLocaleString()}`
+                  : "—"}
+              </dd>
+            </div>
+            <div className="col-span-2">
+              <dt className="font-medium text-stone-500">Estimated job size</dt>
+              <dd>
+                <EstimatedJobValue
+                  value={lead.estimated_job_value}
+                  heatedSqft={lead.building_heated_area}
+                  compact
+                  showDisclaimer={false}
+                />
+              </dd>
+            </div>
+          </dl>
+          <div className="mt-3 rounded-lg bg-stone-50 px-3 py-2">
+            <EstimatedJobValue
+              value={lead.estimated_job_value}
+              heatedSqft={lead.building_heated_area}
+              showDisclaimer
+            />
           </div>
-          <div>
-            <dt className="font-medium text-stone-500">Last roof / built</dt>
-            <dd>
-              {lead.last_roof_date
-                ? new Date(lead.last_roof_date).getFullYear()
-                : lead.year_built ?? "—"}
-            </dd>
-          </div>
-          <div>
-            <dt className="font-medium text-stone-500">Year built</dt>
-            <dd>{lead.year_built ?? "—"}</dd>
-          </div>
-          <div>
-            <dt className="font-medium text-stone-500">Assessed value</dt>
-            <dd>
-              {lead.assessed_value != null
-                ? `$${Number(lead.assessed_value).toLocaleString()}`
-                : "—"}
-            </dd>
-          </div>
-        </dl>
+        </>
       )}
 
       {type === "code_violation" && lead.violation_desc && !compact && (
@@ -119,6 +140,18 @@ export function LeadCard({
           {lead.violation_case ? ` (Case ${lead.violation_case})` : ""}
         </p>
       )}
+
+      {(type === "code_violation" || type === "new_construction") &&
+        lead.estimated_job_value != null &&
+        !compact && (
+          <div className="mt-4 border-t border-stone-100 pt-3">
+            <EstimatedJobValue
+              value={lead.estimated_job_value}
+              heatedSqft={lead.building_heated_area}
+              showDisclaimer
+            />
+          </div>
+        )}
 
       {type === "new_construction" && !compact && (
         <p className="mt-3 rounded-lg bg-sky-50 px-3 py-2 text-xs text-sky-900">

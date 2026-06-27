@@ -12,6 +12,7 @@ export type AgingRoofCandidate = {
   zip: string | null;
   year_built: number | null;
   assessed_value: number | null;
+  building_heated_area: number | null;
   lat: number | null;
   lng: number | null;
   last_roof_date: Date | null;
@@ -132,6 +133,7 @@ export function evaluateAgingRoof(
       zip: property.zip,
       year_built: property.year_built,
       assessed_value: property.assessed_value,
+      building_heated_area: property.building_heated_area,
       lat: property.lat,
       lng: property.lng,
       last_roof_date: latestPermit.issue_date,
@@ -169,6 +171,7 @@ export function evaluateAgingRoof(
     zip: property.zip,
     year_built: property.year_built,
     assessed_value: property.assessed_value,
+    building_heated_area: property.building_heated_area,
     lat: property.lat,
     lng: property.lng,
     last_roof_date: proxyRoofDate,

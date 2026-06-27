@@ -13,6 +13,8 @@ export type LeadRecord = {
   last_roof_date: string | null;
   year_built: number | null;
   assessed_value: number | null;
+  building_heated_area: number | null;
+  estimated_job_value: number | null;
   violation_case: string | null;
   violation_desc: string | null;
   signal_summary: string;
@@ -28,6 +30,7 @@ export type PropertyRow = {
   zip: string | null;
   year_built: number | null;
   assessed_value: number | null;
+  building_heated_area: number | null;
   lat: number | null;
   lng: number | null;
 };

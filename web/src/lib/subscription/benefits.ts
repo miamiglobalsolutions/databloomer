@@ -54,6 +54,14 @@ export const SUBSCRIPTION_BENEFITS: SubscriptionBenefit[] = [
     status: "included",
   },
   {
+    id: "estimated-job-value",
+    title: "Estimated job value on every lead",
+    description:
+      "See projected re-roof size from county heated living area so you can compare job weight between leads before you knock. Estimates only — not quotes.",
+    status: "included",
+    highlight: true,
+  },
+  {
     id: "top-zips",
     title: "Top Bloom ZIP rankings",
     description:

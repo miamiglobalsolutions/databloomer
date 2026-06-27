@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { DigestSubscribe } from "@/components/digest-subscribe";
+import { ROOF_JOB_VALUE_DISCLAIMER, getRoofJobEstimatePerSqft } from "@/lib/leads/roof-job-value";
 import { MIAMI_AREA_PAGES } from "@/lib/miami-dade/areas";
 
 const appUrl =
@@ -63,6 +64,8 @@ const jsonLd = {
 };
 
 export default function AboutPage() {
+  const jobRate = getRoofJobEstimatePerSqft();
+
   return (
     <main className="flex-1">
       <script
@@ -128,6 +131,22 @@ export default function AboutPage() {
             Miami-Dade property appraiser data, permit history, and home value.
             Higher scores mean a stronger replacement opportunity. Code enforcement
             leads are scored by case urgency and open status.
+          </p>
+        </section>
+
+        <section className="mt-12 space-y-4">
+          <h2 className="text-2xl font-semibold text-stone-900">
+            Estimated job value — compare job size between leads
+          </h2>
+          <p className="leading-relaxed text-stone-600">
+            Every aging-roof lead can show an estimated re-roof value derived from
+            Miami-Dade county heated living area and a default replacement rate
+            (currently about ${jobRate}/sq ft). That helps your team prioritize a
+            $28,000 ranch versus a $52,000 two-story before anyone knocks the door
+            — without guessing from the curb.
+          </p>
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
+            {ROOF_JOB_VALUE_DISCLAIMER}
           </p>
         </section>
 

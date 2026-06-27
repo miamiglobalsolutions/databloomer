@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import type { LeadRecord } from "@/lib/leads/types";
+import { enrichLeadRecord } from "@/lib/leads/roof-job-value";
 import { LEADS_API_MAX, LEADS_ZIP_MAX } from "@/lib/leads/limits";
 import { normalizeZipInput } from "@/lib/miami-dade/zips";
 import { query } from "@/lib/db/client";
@@ -75,13 +76,15 @@ export async function GET(request: Request) {
       );
     }
 
-    const leads = isSubscriptionGatingEnabled() && !access.full
+    const rawLeads = isSubscriptionGatingEnabled() && !access.full
       ? result.rows.map((row) => ({
           ...row,
           address: maskAddress(row.address),
           folio: row.folio ? maskFolio(row.folio) : null,
         }))
       : result.rows;
+
+    const leads = rawLeads.map((row) => enrichLeadRecord(row));
 
     return NextResponse.json({
       leads,
