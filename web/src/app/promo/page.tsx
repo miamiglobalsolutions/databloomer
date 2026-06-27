@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DataBloomer — Miami-Dade Roofing Leads",
     description:
-      "40-second overview: aging roof leads, Bloom Zones, and canvassing intelligence for Miami roofers.",
+      "DataBloomer promo video: aging roof leads, Bloom Zones, and canvassing intelligence for Miami roofers.",
     url: PROMO_PAGE_URL,
     siteName: "DataBloomer",
     type: "video.other",
@@ -59,7 +59,7 @@ export default function PromoPage() {
 
       <section className="mx-auto max-w-4xl px-6 py-12 sm:py-16">
         <p className="mb-3 text-sm font-medium uppercase tracking-widest text-orange-600">
-          40-second overview
+          Promo video
         </p>
         <h1 className="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
           See DataBloomer in action

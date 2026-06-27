@@ -41,7 +41,7 @@ export default function HomePage() {
             href="/promo"
             className="rounded-lg border border-stone-300 bg-white px-6 py-3 font-medium text-stone-800 hover:bg-stone-50"
           >
-            Watch 40s overview
+            Watch promo video
           </Link>
           <Link
             href="/subscribe"
