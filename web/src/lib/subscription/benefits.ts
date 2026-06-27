@@ -54,14 +54,6 @@ export const SUBSCRIPTION_BENEFITS: SubscriptionBenefit[] = [
     status: "included",
   },
   {
-    id: "csv-export",
-    title: "CSV export for canvassing",
-    description:
-      "Download full lead lists with address, folio, score, and map coordinates for your CRM or door-knock routes.",
-    status: "included",
-    highlight: true,
-  },
-  {
     id: "top-zips",
     title: "Top Bloom ZIP rankings",
     description:

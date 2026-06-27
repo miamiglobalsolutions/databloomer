@@ -16,7 +16,7 @@ const appUrl =
 export const metadata: Metadata = {
   title: "Subscribe — What You Get with DataBloomer",
   description:
-    "Unlimited Miami-Dade roofing leads, full addresses, folio numbers, Bloom Zones, CSV export, and weekly email lead updates for subscribers.",
+    "Unlimited Miami-Dade roofing leads, full addresses, folio numbers, Bloom Zones, and weekly email lead updates for subscribers.",
   keywords: [
     "Miami roofing leads subscription",
     "roofing contractor lead service",
@@ -151,11 +151,6 @@ export default function SubscribePage() {
                   feature="Folio numbers"
                   free="Hidden / blurred"
                   paid="✓ Full folio"
-                />
-                <CompareRow
-                  feature="CSV export"
-                  free="—"
-                  paid="✓ Full canvassing lists"
                 />
                 <CompareRow
                   feature="Top Bloom ZIPs"

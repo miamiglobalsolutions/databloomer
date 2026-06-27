@@ -95,7 +95,7 @@ export const MIAMI_AREA_PAGES: MiamiAreaPage[] = [
     [
       "Mix of aging commercial and residential roofs",
       "List and interactive map views for subscribers",
-      "CSV export for field teams",
+      "Interactive map for field teams",
     ],
     ["Downtown Miami roofing leads"],
   ),
@@ -189,7 +189,7 @@ export const MIAMI_AREA_PAGES: MiamiAreaPage[] = [
     "West Miami sits between Coral Gables and Sweetwater with dense residential blocks ideal for neighborhood canvassing. Focus on 33144 leads ranked by roof age.",
     [
       "Compact city with high roof density per mile",
-      "Easy CSV export for small crew routes",
+      "Interactive map for small crew routes",
       "Close to major west Miami-Dade markets",
     ],
   ),
@@ -298,7 +298,7 @@ export const MIAMI_AREA_PAGES: MiamiAreaPage[] = [
     [
       "Island neighborhoods with aging stock",
       "Filter 33141 on dashboard map",
-      "Subscriber CSV export for routes",
+      "Subscriber map view for routes",
     ],
   ),
   area(
@@ -468,7 +468,7 @@ export const MIAMI_AREA_PAGES: MiamiAreaPage[] = [
     "33176",
     "south",
     "neighborhood",
-    "Kendall's suburban single-family homes are a staple for residential roofers. Filter 33176 leads, export CSV canvassing lists, and focus on red-zone replacement prospects.",
+    "Kendall's suburban single-family homes are a staple for residential roofers. Filter 33176 leads and focus on red-zone replacement prospects.",
     [
       "Suburban single-family replacement volume",
       "Strong DataBloom Score spread",
@@ -589,11 +589,11 @@ export const MIAMI_AREA_PAGES: MiamiAreaPage[] = [
     "33018",
     "west",
     "city",
-    "Hialeah Gardens' single-family neighborhoods in 33018 are a natural extension for west Miami-Dade roofers. Export 33018 routes from the dashboard.",
+    "Hialeah Gardens' single-family neighborhoods in 33018 are a natural extension for west Miami-Dade roofers. Filter 33018 leads on the dashboard map.",
     [
       "Suburban west county market",
       "Aging roofs from 2001–2013 builds",
-      "CSV export for crews",
+      "Interactive map for crews",
     ],
   ),
   area(

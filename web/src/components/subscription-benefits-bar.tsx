@@ -5,7 +5,7 @@ const TOP_BENEFIT_IDS = [
   "addresses",
   "folios",
   "county-map",
-  "csv-export",
+  "databloom-score",
   "email-digest",
   "reddit-requests",
 ] as const;

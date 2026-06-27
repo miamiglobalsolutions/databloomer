@@ -9,7 +9,6 @@ const ISSUE_TYPES = new Set([
   "billing",
   "dashboard",
   "map",
-  "export",
   "other",
 ]);
 
@@ -70,7 +69,6 @@ export async function POST(request: Request) {
       billing: "Billing / subscription",
       dashboard: "Dashboard / leads",
       map: "Map view",
-      export: "CSV export",
       other: "Other technical issue",
     };
 

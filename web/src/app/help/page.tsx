@@ -24,8 +24,8 @@ export default function HelpPage() {
           Subscriber help
         </h1>
         <p className="mt-3 text-stone-600">
-          Technical support for billing, sign-in, dashboard, map, and export
-          issues. Available to active subscribers and admins after sign-in.
+          Technical support for billing, sign-in, dashboard, and map issues.
+          Available to active subscribers and admins after sign-in.
         </p>
         <p className="mt-2 text-sm text-stone-500">
           For general inquiries, use{" "}

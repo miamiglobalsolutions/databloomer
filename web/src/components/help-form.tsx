@@ -75,7 +75,6 @@ export function HelpForm() {
           <option value="billing">Billing / subscription</option>
           <option value="dashboard">Dashboard / leads</option>
           <option value="map">Map view</option>
-          <option value="export">CSV export</option>
           <option value="other">Other technical issue</option>
         </select>
       </div>

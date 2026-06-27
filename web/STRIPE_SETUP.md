@@ -74,7 +74,7 @@ Use the `whsec_...` from `stripe listen` in local `.env`.
 3. Pay with test card `4242 4242 4242 4242`
 4. Redirect to `/subscribe/success?session_id=...`
 5. App verifies session and sets subscriber cookies
-6. Dashboard should show **unmasked** addresses/folios + CSV export
+6. Dashboard should show **unmasked** addresses and folios
 
 ### Returning on another browser/device
 

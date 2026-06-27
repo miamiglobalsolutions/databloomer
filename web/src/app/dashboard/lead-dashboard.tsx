@@ -11,7 +11,6 @@ import { DigestSubscribe } from "@/components/digest-subscribe";
 import type { BloomZoneTier } from "@/lib/leads/databloom-score";
 import { filterLeadsByBloomZone } from "@/lib/leads/databloom-score";
 import { computeTopBloomZips } from "@/lib/leads/bloom-zips";
-import { downloadLeadsCsv } from "@/lib/leads/export-csv";
 import {
   LEADS_API_MAX,
   LEADS_MAP_MAX,
@@ -186,8 +185,6 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
     () => computeTopBloomZips(filteredLeads, 5),
     [filteredLeads],
   );
-  const canExport = fullAccess;
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -227,19 +224,6 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
           >
             Refresh
           </button>
-          <button
-            type="button"
-            disabled={filteredLeads.length === 0 || !canExport}
-            onClick={() => downloadLeadsCsv(sortedLeads, type, fullAccess)}
-            className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-800 hover:bg-stone-50 disabled:opacity-50"
-            title={
-              canExport
-                ? "Download CSV"
-                : "Subscribe for full CSV export with addresses"
-            }
-          >
-            Export CSV
-          </button>
           <p className="text-sm text-stone-500">
             {loading
               ? "Loading…"
@@ -274,14 +258,14 @@ export function LeadDashboard({ type, initialZip, initialView = "list" }: Props)
         onChange={setActiveBloomTiers}
       />
 
-      {!canExport && (
+      {!fullAccess && (
         <p className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-950">
           Preview mode: addresses and folios are masked, and the interactive map
           is locked.{" "}
           <Link href="/subscribe" className="font-medium underline">
             Subscribe
           </Link>{" "}
-          for full canvassing data, CSV export, and Map View.
+          for full canvassing data and Map View.
         </p>
       )}
 
