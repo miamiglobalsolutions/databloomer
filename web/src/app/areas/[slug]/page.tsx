@@ -6,8 +6,7 @@ import { DigestSubscribe } from "@/components/digest-subscribe";
 import { NeighborhoodBloomCard } from "@/components/neighborhood-bloom-card";
 import { fetchNeighborhoodBloomForZip } from "@/lib/leads/neighborhood-bloom-server";
 import { getAreaBySlug, getAreaSlugs } from "@/lib/miami-dade/areas";
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
+import { APP_URL, defaultOpenGraph } from "@/lib/site/seo";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -26,11 +25,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: area.title,
     description: area.description,
     keywords: area.keywords,
-    alternates: { canonical: `${appUrl}/areas/${area.slug}` },
-    openGraph: {
+    alternates: { canonical: `${APP_URL}/areas/${area.slug}` },
+    openGraph: defaultOpenGraph(area.title, area.description, `/areas/${area.slug}`),
+    twitter: {
+      card: "summary_large_image",
       title: area.title,
       description: area.description,
-      url: `${appUrl}/areas/${area.slug}`,
     },
   };
 }
@@ -51,7 +51,7 @@ export default async function AreaPage({ params }: PageProps) {
     "@type": "WebPage",
     name: area.title,
     description: area.description,
-    url: `${appUrl}/areas/${area.slug}`,
+    url: `${APP_URL}/areas/${area.slug}`,
     about: {
       "@type": "Place",
       name: area.name,

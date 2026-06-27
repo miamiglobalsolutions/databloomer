@@ -9,21 +9,34 @@ import {
   SUBSCRIPTION_BENEFITS,
   SUBSCRIPTION_TAGLINE,
 } from "@/lib/subscription/benefits";
-
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
+import {
+  APP_URL,
+  CONTRACTOR_SEO_KEYWORDS,
+  defaultOpenGraph,
+} from "@/lib/site/seo";
 
 export const metadata: Metadata = {
-  title: "Subscribe — What You Get with DataBloomer",
+  title: "Roofing Lead Subscription — Miami-Dade Contractors",
   description:
-    "Unlimited Miami-Dade roofing leads, full addresses, folio numbers, Bloom Zones, estimated job values, and weekly email lead updates for subscribers.",
+    "Subscribe to DataBloomer: unlimited Miami-Dade roofing leads, full addresses, folio numbers, Bloom Zone maps, DataBloom Score, estimated job values, code violations, and weekly email updates for Florida roofers.",
   keywords: [
+    ...CONTRACTOR_SEO_KEYWORDS,
     "Miami roofing leads subscription",
     "roofing contractor lead service",
     "DataBloomer subscription",
-    "canvassing leads Miami",
   ],
-  alternates: { canonical: `${appUrl}/subscribe` },
+  alternates: { canonical: `${APP_URL}/subscribe` },
+  openGraph: defaultOpenGraph(
+    "Roofing Lead Subscription — Miami-Dade Contractors",
+    "Full Miami-Dade roofing lead access: Bloom Zones, addresses, DataBloom Score, and weekly updates.",
+    "/subscribe",
+  ),
+  twitter: {
+    card: "summary_large_image",
+    title: "DataBloomer Roofing Lead Subscription",
+    description:
+      "Miami-Dade aging roof leads, Bloom Zones, and canvassing tools for roofing contractors.",
+  },
 };
 
 export default function SubscribePage() {

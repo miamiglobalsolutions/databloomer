@@ -1,14 +1,12 @@
 import type { MetadataRoute } from "next";
 import { MIAMI_AREA_PAGES } from "@/lib/miami-dade/areas";
-
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
+import { APP_URL, SITEMAP_LAST_MODIFIED } from "@/lib/site/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
+  const lastModified = SITEMAP_LAST_MODIFIED;
 
   const areaEntries: MetadataRoute.Sitemap = MIAMI_AREA_PAGES.map((area) => ({
-    url: `${appUrl}/areas/${area.slug}`,
+    url: `${APP_URL}/areas/${area.slug}`,
     lastModified,
     changeFrequency: "weekly",
     priority: 0.75,
@@ -16,44 +14,44 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
-      url: appUrl,
+      url: APP_URL,
       lastModified,
       changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: `${appUrl}/about`,
+      url: `${APP_URL}/about`,
       lastModified,
       changeFrequency: "monthly",
       priority: 0.9,
     },
     {
-      url: `${appUrl}/promo`,
+      url: `${APP_URL}/promo`,
       lastModified,
       changeFrequency: "yearly",
       priority: 0.85,
     },
     {
-      url: `${appUrl}/contact`,
+      url: `${APP_URL}/contact`,
       lastModified,
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
-      url: `${appUrl}/subscribe`,
+      url: `${APP_URL}/subscribe`,
       lastModified,
       changeFrequency: "monthly",
       priority: 0.95,
     },
     {
-      url: `${appUrl}/areas`,
+      url: `${APP_URL}/areas`,
       lastModified,
       changeFrequency: "weekly",
       priority: 0.9,
     },
     ...areaEntries,
     {
-      url: `${appUrl}/dashboard`,
+      url: `${APP_URL}/dashboard`,
       lastModified,
       changeFrequency: "daily",
       priority: 0.8,

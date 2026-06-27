@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
+import {
+  CONTRACTOR_SEO_KEYWORDS,
+  HOME_PAGE_DESCRIPTION,
+  APP_URL,
+} from "@/lib/site/seo";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,26 +18,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
+const appUrl = APP_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: {
-    default: "DataBloomer — Miami-Dade Roofing Leads & Bloom Zones",
+    default: "Miami Roofing Leads for Contractors — DataBloomer",
     template: "%s | DataBloomer",
   },
-  description:
-    "Miami-Dade roofing lead AI Intelligence for contractors. Aging roof leads, Bloom Zones color-coded maps, DataBloom Score, and code enforcement opportunities.",
-  keywords: [
-    "Miami roofing leads",
-    "Miami-Dade roof replacement",
-    "roofing contractor leads Florida",
-    "aging roof leads",
-    "Bloom Zones",
-    "DataBloom Score",
-    "roof canvassing Miami",
-  ],
+  description: HOME_PAGE_DESCRIPTION,
+  keywords: [...CONTRACTOR_SEO_KEYWORDS],
   applicationName: "DataBloomer",
   ...(process.env.GOOGLE_SITE_VERIFICATION
     ? {
@@ -46,15 +41,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: appUrl,
     siteName: "DataBloomer",
-    title: "DataBloomer — Miami-Dade Roofing Leads",
-    description:
-      "Find aging roof leads and Bloom Zones maps across Miami-Dade County.",
+    title: "Miami Roofing Leads for Contractors — DataBloomer",
+    description: HOME_PAGE_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "DataBloomer — Miami Roofing Leads",
-    description:
-      "Bloom Zones maps and DataBloom Score for Miami-Dade roofing contractors.",
+    title: "Miami Roofing Leads for Contractors — DataBloomer",
+    description: HOME_PAGE_DESCRIPTION,
   },
   alternates: {
     canonical: appUrl,

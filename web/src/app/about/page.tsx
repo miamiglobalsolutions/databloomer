@@ -4,63 +4,50 @@ import { SiteHeader } from "@/components/site-header";
 import { DigestSubscribe } from "@/components/digest-subscribe";
 import { ROOF_JOB_VALUE_DISCLAIMER, getRoofJobEstimatePerSqft } from "@/lib/leads/roof-job-value";
 import { MIAMI_AREA_PAGES } from "@/lib/miami-dade/areas";
-
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
+import {
+  APP_URL,
+  CONTRACTOR_SEO_KEYWORDS,
+  buildSoftwareApplicationJsonLd,
+  defaultOpenGraph,
+} from "@/lib/site/seo";
 
 export const metadata: Metadata = {
-  title: "About DataBloomer — Miami Roofing Leads & Bloom Zones",
+  title: "About — Miami Roofing Leads & Bloom Zones for Contractors",
   description:
-    "DataBloomer helps Miami-Dade roofing contractors find aging roof leads, code enforcement opportunities, and canvassing routes with Bloom Zones maps and the DataBloom Score.",
-  keywords: [
-    "Miami roofing leads",
-    "Miami-Dade roofing contractor leads",
-    "roof replacement leads Miami",
-    "aging roof leads Florida",
-    "roofing sales leads Miami-Dade",
-    "canvassing routes Miami roofers",
-    "roofing lead generation Miami",
-    "Miami roof replacement window",
-    "Brickell roofing leads",
-    "South Beach roofing contractor",
-    "Kendall roof replacement",
-    "Homestead roofing leads",
-    "Coral Gables roof leads",
-    "Miami code violation roofing",
-    "DataBloom Score",
-    "Bloom Zones heat map",
-  ],
+    "Learn how DataBloomer helps Miami-Dade roofing contractors find aging roof leads, code enforcement opportunities, Bloom Zone canvassing maps, DataBloom Score ranking, and estimated job value.",
+  keywords: [...CONTRACTOR_SEO_KEYWORDS],
   alternates: {
-    canonical: `${appUrl}/about`,
+    canonical: `${APP_URL}/about`,
   },
-  openGraph: {
-    title: "About DataBloomer — Miami Roofing Lead AI Intelligence",
+  openGraph: defaultOpenGraph(
+    "About DataBloomer — Miami Roofing Leads for Contractors",
+    "Aging roof leads, Bloom Zones, and DataBloom Score for Miami-Dade roofing contractors.",
+    "/about",
+  ),
+  twitter: {
+    card: "summary_large_image",
+    title: "About DataBloomer — Miami Roofing Leads",
     description:
-      "Find aging roofs and enforcement leads across Miami-Dade with Bloom Zones and the DataBloom Score.",
-    url: `${appUrl}/about`,
-    siteName: "DataBloomer",
-    type: "website",
+      "Miami-Dade roofing lead intelligence for contractors — aging roofs, Bloom Zones, and canvassing tools.",
   },
 };
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "DataBloomer",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web",
-  url: appUrl,
-  description:
-    "Miami-Dade roofing lead AI Intelligence for contractors — aging roof leads, Bloom Zones color-coded maps, and DataBloom Score ranking.",
-  areaServed: {
-    "@type": "AdministrativeArea",
-    name: "Miami-Dade County, Florida",
-  },
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
-  },
+  "@graph": [
+    buildSoftwareApplicationJsonLd(),
+    {
+      "@type": "AboutPage",
+      "@id": `${APP_URL}/about#webpage`,
+      url: `${APP_URL}/about`,
+      name: "About DataBloomer — Miami Roofing Leads",
+      description:
+        "How DataBloomer helps Miami-Dade roofing contractors find aging roof leads and Bloom Zones.",
+      isPartOf: { "@id": `${APP_URL}/#website` },
+      about: { "@id": `${APP_URL}/#software` },
+      inLanguage: "en-US",
+    },
+  ],
 };
 
 export default function AboutPage() {

@@ -6,23 +6,22 @@ import {
   PROMO_POSTER_SRC,
   PROMO_VIDEO_SRC,
 } from "@/lib/site/promo-video";
-
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
+import { APP_URL, CONTRACTOR_SEO_KEYWORDS } from "@/lib/site/seo";
 
 const absoluteVideoUrl = PROMO_VIDEO_SRC.startsWith("http")
   ? PROMO_VIDEO_SRC
-  : `${appUrl}${PROMO_VIDEO_SRC}`;
+  : `${APP_URL}${PROMO_VIDEO_SRC}`;
 
 export const metadata: Metadata = {
-  title: "Watch — DataBloomer Promo",
+  title: "Promo Video — Miami Roofing Leads for Contractors",
   description:
-    "See how DataBloomer helps Miami-Dade roofing contractors find aging roof leads, Bloom Zones maps, and DataBloom Score rankings.",
+    "Watch the DataBloomer promo: Miami-Dade aging roof leads, Bloom Zone canvassing maps, DataBloom Score, and roofing contractor lead subscription overview.",
+  keywords: [...CONTRACTOR_SEO_KEYWORDS],
   alternates: { canonical: PROMO_PAGE_URL },
   openGraph: {
-    title: "DataBloomer — Miami-Dade Roofing Leads",
+    title: "DataBloomer Promo — Miami Roofing Leads for Contractors",
     description:
-      "DataBloomer promo video: aging roof leads, Bloom Zones, and canvassing intelligence for Miami roofers.",
+      "Video overview: aging roof leads, Bloom Zones, and canvassing intelligence for Miami-Dade roofers.",
     url: PROMO_PAGE_URL,
     siteName: "DataBloomer",
     type: "video.other",
@@ -36,7 +35,7 @@ export const metadata: Metadata = {
     ],
     images: [
       {
-        url: `${appUrl}${PROMO_POSTER_SRC}`,
+        url: `${APP_URL}${PROMO_POSTER_SRC}`,
         width: 1920,
         height: 1080,
         alt: "DataBloomer promo video",
@@ -48,7 +47,7 @@ export const metadata: Metadata = {
     title: "DataBloomer — Miami Roofing Leads",
     description:
       "Watch how Bloom Zones and the DataBloom Score help Miami-Dade roofing crews find the best prospects.",
-    images: [`${appUrl}${PROMO_POSTER_SRC}`],
+    images: [`${APP_URL}${PROMO_POSTER_SRC}`],
   },
 };
 

@@ -6,27 +6,25 @@ import {
   MIAMI_AREA_PAGES,
 } from "@/lib/miami-dade/areas";
 import { AREA_REGION_LABELS, AREA_REGION_ORDER } from "@/lib/miami-dade/area-regions";
-
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
+import { APP_URL, CONTRACTOR_SEO_KEYWORDS, defaultOpenGraph } from "@/lib/site/seo";
 
 export const metadata: Metadata = {
-  title: "Miami-Dade Roofing Lead Markets — Cities & Neighborhoods",
+  title: "Miami-Dade Roofing Lead Markets — Cities, ZIPs & Neighborhoods",
   description:
-    "Browse DataBloomer roofing lead pages for every major Miami-Dade city, town, village, and neighborhood. Aging roof leads, Bloom Zones, and ZIP-level bloom forecast.",
+    "Browse DataBloomer roofing lead pages for every major Miami-Dade city, town, village, and neighborhood. Aging roof leads, Bloom Zones, ZIP-level bloom forecast, and contractor canvassing data.",
   keywords: [
+    ...CONTRACTOR_SEO_KEYWORDS,
     "Miami-Dade roofing leads by city",
     "Miami neighborhood roofing leads",
     "Florida roofing contractor markets",
     "Miami-Dade ZIP roofing leads",
   ],
-  alternates: { canonical: `${appUrl}/areas` },
-  openGraph: {
-    title: "Miami-Dade Markets — DataBloomer",
-    description:
-      "Roofing lead pages for cities and neighborhoods across Miami-Dade County.",
-    url: `${appUrl}/areas`,
-  },
+  alternates: { canonical: `${APP_URL}/areas` },
+  openGraph: defaultOpenGraph(
+    "Miami-Dade Roofing Lead Markets — DataBloomer",
+    "Roofing lead pages for cities and neighborhoods across Miami-Dade County.",
+    "/areas",
+  ),
 };
 
 export default function AreasIndexPage() {

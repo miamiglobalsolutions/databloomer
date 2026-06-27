@@ -2,15 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { ContactForm } from "@/components/contact-form";
-
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
+import { APP_URL, CONTRACTOR_SEO_KEYWORDS, defaultOpenGraph } from "@/lib/site/seo";
 
 export const metadata: Metadata = {
-  title: "Contact DataBloomer",
+  title: "Contact — Miami Roofing Leads & Subscriptions",
   description:
-    "Questions about Miami-Dade roofing leads, subscriptions, or DataBloomer? Send us a message.",
-  alternates: { canonical: `${appUrl}/contact` },
+    "Contact DataBloomer about Miami-Dade roofing lead subscriptions, Bloom Zones, pricing, and contractor access for aging roof leads across Florida.",
+  keywords: [...CONTRACTOR_SEO_KEYWORDS],
+  alternates: { canonical: `${APP_URL}/contact` },
+  openGraph: defaultOpenGraph(
+    "Contact DataBloomer — Miami Roofing Leads",
+    "Questions about Miami-Dade roofing leads, subscriptions, and DataBloomer.",
+    "/contact",
+  ),
 };
 
 export default function ContactPage() {
