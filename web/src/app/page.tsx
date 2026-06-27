@@ -50,6 +50,34 @@ export default function HomePage() {
             What you get as a subscriber
           </Link>
         </div>
+
+        <div className="mt-12 max-w-3xl rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50/80 p-6 sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-wide text-orange-800">
+            Simple ROI
+          </p>
+          <p className="mt-3 text-lg leading-relaxed text-stone-800 sm:text-xl">
+            Close one{" "}
+            <strong className="font-semibold text-stone-900">$25,000</strong> re-roof
+            from DataBloomer leads in a quarter, and that&apos;s roughly{" "}
+            <strong className="font-semibold text-orange-800">16× return</strong> on
+            the quarter&apos;s subscription cost — before the second or third job.
+          </p>
+          <p className="mt-3 text-sm text-stone-600">
+            One good week of canvassing in the right Bloom Zone can cover months of
+            access. When the data puts your crew on the right doors, the subscription
+            sells itself.
+          </p>
+          <p className="mt-4 text-xs text-stone-500">
+            Example assumes one closed job vs. a ~$500/month plan (~$1,500 per
+            quarter). Your results will vary.
+          </p>
+          <Link
+            href="/subscribe"
+            className="mt-6 inline-flex rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-orange-700"
+          >
+            See subscription benefits
+          </Link>
+        </div>
       </section>
 
       <section className="border-t border-stone-200 bg-white">
