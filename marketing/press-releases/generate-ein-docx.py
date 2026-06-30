@@ -40,7 +40,7 @@ def main() -> None:
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             continue
 
-        if block.startswith("DataBloomer Publishes"):
+        if block.startswith("AI Analysis of Miami-Dade Homes Identifies"):
             p = doc.add_paragraph(block)
             p.runs[0].bold = True
             p.runs[0].font.size = Pt(14)
