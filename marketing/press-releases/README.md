@@ -24,8 +24,11 @@ Writes:
 
 ## EIN press release
 
+Uses the **same published snapshot JSON** as the static report page (not the local dev database). Run `report:snapshot` first so numbers match the live site.
+
 ```bash
 cd web
+npm run report:snapshot
 npx tsx scripts/generate-aging-roof-press-release.ts
 python ../marketing/press-releases/generate-ein-docx.py
 ```

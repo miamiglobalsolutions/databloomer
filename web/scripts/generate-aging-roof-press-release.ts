@@ -1,23 +1,24 @@
 /**
- * Generate EIN Presswire-formatted press release from live Aging Roof Index data.
- * Run: npx tsx scripts/generate-aging-roof-press-release.ts
+ * Generate EIN Presswire-formatted press release from the published report snapshot.
+ * Uses the same JSON as the static report page — not the local dev database.
+ *
+ * Run after snapshot: npm run report:snapshot && npx tsx scripts/generate-aging-roof-press-release.ts
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { closeDb } from "../src/lib/db/client";
-import { fetchAgingRoofIndexReport } from "../src/lib/reports/aging-roof-index-server";
 import {
   AGING_ROOF_INDEX_PATH,
-  formatCurrency,
   formatNumber,
 } from "../src/lib/reports/aging-roof-index";
+import { getAgingRoofIndexReportSnapshot } from "../src/lib/reports/aging-roof-index-snapshot";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.databloomer.com";
 const REPORT_URL = `${APP_URL}${AGING_ROOF_INDEX_PATH}`;
 const OUT_DIR = join(process.cwd(), "..", "marketing", "press-releases");
 
-function formatReleaseDate(): string {
-  return new Date().toLocaleDateString("en-US", {
+function formatReleaseDate(iso?: string): string {
+  const source = iso ? new Date(iso) : new Date();
+  return source.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -25,12 +26,12 @@ function formatReleaseDate(): string {
   });
 }
 
-async function main() {
-  const report = await fetchAgingRoofIndexReport();
+function main() {
+  const report = getAgingRoofIndexReportSnapshot();
   const { countyTotals, top10 } = report;
 
   if (top10.length === 0) {
-    console.error("No report data — run leads:refresh first.");
+    console.error("No snapshot data — run npm run report:snapshot first.");
     process.exit(1);
   }
 
@@ -46,7 +47,7 @@ async function main() {
 
 AI Analysis of Miami-Dade Homes Identifies Properties at Elevated Risk for Roof Replacement This Hurricane Season
 
-MIAMI, Fla., ${formatReleaseDate()} — DataBloomer, a Miami-Dade roofing intelligence platform, released a public analysis showing where roof replacement risk is concentrated ahead of peak hurricane season. Built from county permit and property records, the report helps homeowners and roofing contractors see where aging roof exposure is rising and where replacement activity is likely to accelerate.
+MIAMI, Fla., ${formatReleaseDate(report.generatedAt)} — DataBloomer, a Miami-Dade roofing intelligence platform, released a public analysis showing where roof replacement risk is concentrated ahead of peak hurricane season. Built from county permit and property records, the report helps homeowners and roofing contractors see where aging roof exposure is rising and where replacement activity is likely to accelerate.
 
 The full public report is available at:
 ${REPORT_URL}
@@ -97,12 +98,11 @@ Editor note: EIN plans differ on hyperlink count and formatting. If needed for y
   const outPath = join(OUT_DIR, "ein-miami-dade-aging-roofs-hurricane-season-2026.txt");
   writeFileSync(outPath, text, "utf8");
   console.log(`Wrote ${outPath}`);
+  console.log(
+    `Snapshot: ${formatNumber(countyTotals.totalAgingLeads)} aging homes, ${formatNumber(countyTotals.replacementLikely)} replacement-likely`,
+  );
   console.log(`Top ZIP: ${top10[0].zip} (${top10[0].areaLabel}) — score ${top10[0].neighborhoodScore}`);
-
-  await closeDb();
+  console.log(`Data as of: ${formatReleaseDate(report.generatedAt)}`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main();

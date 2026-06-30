@@ -7,15 +7,15 @@ MIAMI, Fla., June 30, 2026 — DataBloomer, a Miami-Dade roofing intelligence pl
 The full public report is available at:
 https://www.databloomer.com/reports/miami-dade-aging-roofs-hurricane-season-2026
 
-DataBloomer's 2026 Miami-Dade Aging Roof Index analyzes 2,593 homes in a well-aged cohort (roofs strictly over 15 years old). In that cohort, 93 homes currently score 80+ on DataBloom Score, DataBloomer's signal for near-term replacement likelihood. Average roof age in the analyzed set is 16.8 years. The analysis is produced from Miami-Dade building permit history and property appraiser records, then modeled at ZIP level so contractors and residents can compare neighborhoods without publishing individual property identifiers in the public edition.
+DataBloomer's 2026 Miami-Dade Aging Roof Index analyzes 49,953 homes in a well-aged cohort (roofs strictly over 15 years old). In that cohort, 20,729 homes currently score 80+ on DataBloom Score, DataBloomer's signal for near-term replacement likelihood. Average roof age in the analyzed set is 21.4 years. The analysis is produced from Miami-Dade building permit history and property appraiser records, then modeled at ZIP level so contractors and residents can compare neighborhoods without publishing individual property identifiers in the public edition.
 
 "Hurricane season always exposes the same issue: many owners do not realize their roof is in a high-risk age band until an inspection, leak, or underwriting event forces a rushed decision," said a DataBloomer spokesperson. "This report helps contractors and homeowners act earlier, with neighborhood-level visibility, instead of reacting late under storm pressure."
 
 Top-ranked ZIPs for 2026 replacement activity:
 
-1. ZIP 33165 (Westchester) — bloom score 83, 93 replacement-likely homes, avg roof age 21.8 years
-2. ZIP 33142 (Miami-Dade 33142) — bloom score 76, 0 replacement-likely homes, avg roof age 16.8 years
-3. ZIP 33032 (Miami-Dade 33032) — bloom score 76, 0 replacement-likely homes, avg roof age 16.2 years
+1. ZIP 33034 (Florida City) — bloom score 93, 96 replacement-likely homes, avg roof age 20.5 years
+2. ZIP 33156 (Pinecrest) — bloom score 90, 328 replacement-likely homes, avg roof age 20.8 years
+3. ZIP 33194 (Miami-Dade 33194) — bloom score 89, 810 replacement-likely homes, avg roof age 22.1 years
 
 The complete Top 10 ZIP table, plus oldest-roof and highest-estimated-cost rankings, is in the full report at https://www.databloomer.com/reports/miami-dade-aging-roofs-hurricane-season-2026. Methodology and update context are published so readers can separate signal from noise in county-level data. Editors and trade readers seeking tables, rankings, and the published as-of date should use that page as the canonical source for the 2026 edition.
 
