@@ -12,8 +12,8 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
 
 HERE = Path(__file__).resolve().parent
-TXT = HERE / "ein-miami-dade-aging-roof-index-2026.txt"
-DOCX = HERE / "ein-miami-dade-aging-roof-index-2026.docx"
+TXT = HERE / "ein-miami-dade-aging-roofs-hurricane-season-2026.txt"
+DOCX = HERE / "ein-miami-dade-aging-roofs-hurricane-season-2026.docx"
 
 
 def main() -> None:

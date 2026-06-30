@@ -2,8 +2,11 @@ import { MIAMI_AREA_PAGES } from "@/lib/miami-dade/areas";
 import { estimateRoofJobValue, getRoofJobEstimatePerSqft } from "@/lib/leads/roof-job-value";
 import type { BloomMomentumLabel } from "@/lib/leads/neighborhood-bloom";
 
-export const AGING_ROOF_INDEX_SLUG = "miami-dade-aging-roof-index-2026";
-export const AGING_ROOF_INDEX_PATH = `/reports/${AGING_ROOF_INDEX_SLUG}`;
+export {
+  AGING_ROOF_INDEX_LEGACY_PATH,
+  AGING_ROOF_INDEX_PATH,
+  AGING_ROOF_INDEX_SLUG,
+} from "@/lib/reports/report-routes";
 
 /** Public report includes only well-aged roofs (strictly over 15 years). */
 export const AGING_ROOF_INDEX_MIN_ROOF_AGE_YEARS = 15;

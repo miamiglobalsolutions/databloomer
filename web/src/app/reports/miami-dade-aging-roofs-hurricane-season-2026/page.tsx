@@ -18,17 +18,19 @@ import {
 } from "@/lib/site/seo";
 
 const REPORT_TITLE =
-  "Miami-Dade Aging Roof Index 2026 — Top ZIPs for Replacement Activity";
+  "Miami-Dade Aging Roofs & Hurricane Season 2026 — ZIP Replacement Index";
 const REPORT_DESCRIPTION =
-  "DataBloomer's public Aging Roof Index ranks Miami-Dade ZIP codes with roofs over 15 years old by replacement likelihood, permit momentum, and estimated re-roof cost ahead of the 2026 hurricane season.";
+  "Free Miami-Dade hurricane season 2026 report: aging roofs over 15 years ranked by ZIP for replacement risk, permit momentum, and estimated re-roof cost before storm season.";
 
 export const metadata: Metadata = {
   title: REPORT_TITLE,
   description: REPORT_DESCRIPTION,
   keywords: [
     ...CONTRACTOR_SEO_KEYWORDS,
-    "Miami aging roof index",
-    "Miami roof replacement ZIP codes",
+    "Miami aging roofs hurricane season",
+    "Miami-Dade hurricane season 2026",
+    "Miami roof replacement hurricane season",
+    "Miami-Dade roof replacement ZIP codes",
     "hurricane season roof replacement Miami",
     "oldest roofs Miami-Dade",
   ],
@@ -36,13 +38,13 @@ export const metadata: Metadata = {
     canonical: `${APP_URL}${AGING_ROOF_INDEX_PATH}`,
   },
   openGraph: defaultOpenGraph(
-    "Miami-Dade Aging Roof Index 2026 — DataBloomer",
+    "Miami-Dade Aging Roofs & Hurricane Season 2026 — DataBloomer",
     REPORT_DESCRIPTION,
     AGING_ROOF_INDEX_PATH,
   ),
   twitter: {
     card: "summary_large_image",
-    title: "Miami-Dade Aging Roof Index 2026",
+    title: "Miami-Dade Aging Roofs & Hurricane Season 2026",
     description: REPORT_DESCRIPTION,
   },
 };
@@ -102,7 +104,7 @@ export default function AgingRoofIndexReportPage() {
           {
             "@type": "ListItem",
             position: 2,
-            name: "Aging Roof Index 2026",
+            name: "Aging Roofs Hurricane Season 2026",
             item: reportUrl,
           },
         ],
@@ -122,7 +124,7 @@ export default function AgingRoofIndexReportPage() {
 
       <article className="mx-auto max-w-4xl px-6 py-16">
         <p className="mb-4 text-sm font-medium uppercase tracking-widest text-orange-600">
-          Public research report · June 2026
+          Miami-Dade hurricane season report · 2026
         </p>
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <span className="rounded-full border border-stone-300 bg-stone-50 px-3 py-1 text-xs font-medium text-stone-700">
@@ -136,8 +138,8 @@ export default function AgingRoofIndexReportPage() {
           </span>
         </div>
         <h1 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-[2.65rem] sm:leading-tight">
-          Miami-Dade Aging Roof Index: top 10 ZIPs for replacement activity
-          ahead of the 2026 hurricane season
+          Miami-Dade aging roofs ahead of 2026 hurricane season: top ZIPs for
+          replacement
         </h1>
         <p className="mt-4 text-sm text-stone-500">
           Published by{" "}
@@ -191,7 +193,7 @@ export default function AgingRoofIndexReportPage() {
                 )}
               </p>
               <p className="mt-4 leading-relaxed text-stone-700">
-                The Aging Roof Index ranks {countyTotals.zipsAnalyzed} ZIP codes
+                The hurricane season replacement index ranks {countyTotals.zipsAnalyzed} ZIP codes
                 where at least 10 aging-roof properties exist, combining neighborhood
                 bloom forecast (permit momentum + untapped aging inventory), average
                 roof age, replacement-likely counts, and estimated job size. The top
@@ -208,7 +210,7 @@ export default function AgingRoofIndexReportPage() {
 
             <section className="mt-14">
               <h2 className="text-2xl font-bold text-stone-900">
-                Top 10 ZIP codes — Aging Roof Index
+                Top 10 ZIP codes — hurricane season replacement index
               </h2>
               <p className="mt-3 text-stone-600">
                 Ranked by neighborhood bloom score (permit momentum, aging inventory,
@@ -386,8 +388,8 @@ export default function AgingRoofIndexReportPage() {
                 For roofing contractors — where to deploy crews
               </h2>
               <p className="leading-relaxed text-stone-600">
-                Canvassing without ZIP-level intelligence burns fuel. The Aging
-                Roof Index highlights where aging inventory, permit momentum, and
+                Canvassing without ZIP-level intelligence burns fuel. This
+                hurricane season index highlights where aging inventory, permit momentum, and
                 job size overlap at the neighborhood level — the same ZIP signals
                 DataBloomer subscribers use to route Bloom Zone canvassing.
               </p>

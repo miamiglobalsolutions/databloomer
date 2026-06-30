@@ -5,7 +5,7 @@ AI Analysis of Miami-Dade Homes Identifies Properties at Elevated Risk for Roof 
 MIAMI, Fla., June 30, 2026 — DataBloomer, a Miami-Dade roofing intelligence platform, released a public analysis showing where roof replacement risk is concentrated ahead of peak hurricane season. Built from county permit and property records, the report helps homeowners and roofing contractors see where aging roof exposure is rising and where replacement activity is likely to accelerate.
 
 The full public report is available at:
-https://www.databloomer.com/reports/miami-dade-aging-roof-index-2026
+https://www.databloomer.com/reports/miami-dade-aging-roofs-hurricane-season-2026
 
 DataBloomer's 2026 Miami-Dade Aging Roof Index analyzes 2,593 homes in a well-aged cohort (roofs strictly over 15 years old). In that cohort, 93 homes currently score 80+ on DataBloom Score, DataBloomer's signal for near-term replacement likelihood. Average roof age in the analyzed set is 16.8 years. The analysis is produced from Miami-Dade building permit history and property appraiser records, then modeled at ZIP level so contractors and residents can compare neighborhoods without publishing individual property identifiers in the public edition.
 
@@ -17,7 +17,7 @@ Top-ranked ZIPs for 2026 replacement activity:
 2. ZIP 33142 (Miami-Dade 33142) — bloom score 76, 0 replacement-likely homes, avg roof age 16.8 years
 3. ZIP 33032 (Miami-Dade 33032) — bloom score 76, 0 replacement-likely homes, avg roof age 16.2 years
 
-The complete Top 10 ZIP table, plus oldest-roof and highest-estimated-cost rankings, is in the full report at https://www.databloomer.com/reports/miami-dade-aging-roof-index-2026. Methodology and update context are published so readers can separate signal from noise in county-level data. Editors and trade readers seeking tables, rankings, and the published as-of date should use that page as the canonical source for the 2026 edition.
+The complete Top 10 ZIP table, plus oldest-roof and highest-estimated-cost rankings, is in the full report at https://www.databloomer.com/reports/miami-dade-aging-roofs-hurricane-season-2026. Methodology and update context are published so readers can separate signal from noise in county-level data. Editors and trade readers seeking tables, rankings, and the published as-of date should use that page as the canonical source for the 2026 edition.
 
 For contractors, the practical use case is canvassing efficiency. Random door-knocking burns fuel and labor when outreach is not aligned to where roof risk clusters. The Aging Roof Index helps crews prioritize ZIPs where aged inventory, replacement-likely scoring, and permit momentum overlap — so teams can stage routes around higher-probability opportunities before demand spikes. Sales managers can assign neighborhoods by current risk intensity instead of anecdotal hot spots; business owners can time staffing and materials around likely replacement corridors; smaller contractors can focus limited canvassing where close rates are stronger.
 
@@ -30,7 +30,7 @@ Hurricane season planning is rarely linear. A forecast shift, insurance inspecti
 The public index combines permit-derived age signals, neighborhood bloom modeling, and replacement-likelihood scoring, plus estimated job-size benchmarks where county heated-area data exists. "Elevated risk" does not mean imminent failure at every address; it means roof age, local replacement momentum, and permit behavior point to higher probability than the county baseline — a starting point for both prospecting and household planning.
 
 Contractors moving from ZIP intelligence to route planning and lead prioritization can use DataBloomer at:
-• Public report: https://www.databloomer.com/reports/miami-dade-aging-roof-index-2026
+• Public report: https://www.databloomer.com/reports/miami-dade-aging-roofs-hurricane-season-2026
 • Platform overview: https://www.databloomer.com/about
 • Subscription: https://www.databloomer.com/subscribe
 • Contact: https://www.databloomer.com/contact
@@ -48,4 +48,4 @@ https://www.databloomer.com/contact
 
 ###
 
-Editor note: EIN plans differ on hyperlink count and formatting. If needed for your plan tier, retain the primary report link (https://www.databloomer.com/reports/miami-dade-aging-roof-index-2026) and include additional DataBloomer links in plain text.
+Editor note: EIN plans differ on hyperlink count and formatting. If needed for your plan tier, retain the primary report link (https://www.databloomer.com/reports/miami-dade-aging-roofs-hurricane-season-2026) and include additional DataBloomer links in plain text.

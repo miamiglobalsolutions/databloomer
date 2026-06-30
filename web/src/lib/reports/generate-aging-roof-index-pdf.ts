@@ -2,6 +2,7 @@ import PDFDocument from "pdfkit";
 import { MOMENTUM_LABEL_COPY } from "@/lib/leads/neighborhood-bloom";
 import { ROOF_JOB_VALUE_DISCLAIMER } from "@/lib/leads/roof-job-value";
 import {
+  AGING_ROOF_INDEX_PATH,
   PUBLIC_REPORT_PRIVACY_NOTICE,
   type AgingRoofIndexReport,
   formatCurrency,
@@ -151,7 +152,7 @@ export function buildAgingRoofIndexPdf(report: AgingRoofIndexReport): Promise<Bu
 
     paragraph(
       doc,
-      `Full interactive report: databloomer.com/reports/miami-dade-aging-roof-index-2026 · Media: databloomer.com/contact`,
+      `Full interactive report: databloomer.com${AGING_ROOF_INDEX_PATH} · Media: databloomer.com/contact`,
     );
 
     doc.end();

@@ -94,7 +94,7 @@ Editor note: EIN plans differ on hyperlink count and formatting. If needed for y
 `;
 
   mkdirSync(OUT_DIR, { recursive: true });
-  const outPath = join(OUT_DIR, "ein-miami-dade-aging-roof-index-2026.txt");
+  const outPath = join(OUT_DIR, "ein-miami-dade-aging-roofs-hurricane-season-2026.txt");
   writeFileSync(outPath, text, "utf8");
   console.log(`Wrote ${outPath}`);
   console.log(`Top ZIP: ${top10[0].zip} (${top10[0].areaLabel}) — score ${top10[0].neighborhoodScore}`);

@@ -44,8 +44,8 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
           <p className="text-sm text-stone-700">
             <span className="font-semibold text-stone-900">New report:</span>{" "}
-            Miami-Dade Aging Roof Index — top 10 ZIPs ahead of 2026 hurricane
-            season
+            Miami-Dade aging roofs &amp; 2026 hurricane season — ZIP replacement
+            index
           </p>
           <Link
             href={AGING_ROOF_INDEX_PATH}
