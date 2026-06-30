@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { getFeaturedAreas, MIAMI_AREA_PAGES } from "@/lib/miami-dade/areas";
+import { AGING_ROOF_INDEX_PATH } from "@/lib/reports/aging-roof-index";
 import {
   CONTRACTOR_SEO_KEYWORDS,
   HOME_PAGE_DESCRIPTION,
@@ -38,6 +39,22 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <SiteHeader active="home" />
+
+      <section className="border-b border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
+          <p className="text-sm text-stone-700">
+            <span className="font-semibold text-stone-900">New report:</span>{" "}
+            Miami-Dade Aging Roof Index — top 10 ZIPs ahead of 2026 hurricane
+            season
+          </p>
+          <Link
+            href={AGING_ROOF_INDEX_PATH}
+            className="shrink-0 rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+          >
+            Read the full report
+          </Link>
+        </div>
+      </section>
 
       <section className="mx-auto max-w-6xl px-6 py-20">
         <p className="mb-4 text-sm font-medium uppercase tracking-widest text-orange-600">

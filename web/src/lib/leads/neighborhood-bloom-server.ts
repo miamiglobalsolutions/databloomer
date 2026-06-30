@@ -5,9 +5,15 @@ import {
   type ZipBloomStats,
 } from "@/lib/leads/neighborhood-bloom";
 
-export async function fetchNeighborhoodBloomForecasts(): Promise<
-  NeighborhoodBloomForecast[]
-> {
+export type NeighborhoodBloomOptions = {
+  /** When set, only aging-roof leads with roof_age_years strictly greater than this value. */
+  minRoofAgeYears?: number;
+};
+
+export async function fetchNeighborhoodBloomForecasts(
+  options?: NeighborhoodBloomOptions,
+): Promise<NeighborhoodBloomForecast[]> {
+  const minRoofAgeYears = options?.minRoofAgeYears ?? null;
   const result = await query<{
     zip: string;
     aging_lead_count: number;
@@ -29,6 +35,7 @@ export async function fetchNeighborhoodBloomForecasts(): Promise<
        WHERE lead_type = 'aging_roof'
          AND zip IS NOT NULL
          AND zip <> ''
+         AND ($1::int IS NULL OR roof_age_years > $1)
        GROUP BY LEFT(zip, 5)
      ),
      permit_zip AS (
@@ -72,6 +79,7 @@ export async function fetchNeighborhoodBloomForecasts(): Promise<
        lz.lng
      FROM lead_zip lz
      LEFT JOIN permit_counts pc ON pc.zip = lz.zip`,
+    [minRoofAgeYears],
   );
 
   const rows: ZipBloomStats[] = result.rows.map((row) => ({

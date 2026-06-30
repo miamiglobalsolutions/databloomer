@@ -2,7 +2,7 @@ export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://databloomer.com";
 
 /** Bump when public marketing/SEO pages change materially. */
-export const SITEMAP_LAST_MODIFIED = new Date("2026-06-26T00:00:00.000Z");
+export const SITEMAP_LAST_MODIFIED = new Date("2026-06-16T00:00:00.000Z");
 
 /** High-intent phrases Miami roofing contractors search for. */
 export const CONTRACTOR_SEO_KEYWORDS = [

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { MIAMI_AREA_PAGES } from "@/lib/miami-dade/areas";
+import { AGING_ROOF_INDEX_PATH } from "@/lib/reports/aging-roof-index";
 import { APP_URL, SITEMAP_LAST_MODIFIED } from "@/lib/site/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -30,6 +31,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "yearly",
       priority: 0.85,
+    },
+    {
+      url: `${APP_URL}${AGING_ROOF_INDEX_PATH}`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.92,
     },
     {
       url: `${APP_URL}/contact`,
