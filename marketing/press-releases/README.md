@@ -33,4 +33,12 @@ npx tsx scripts/generate-aging-roof-press-release.ts
 python ../marketing/press-releases/generate-ein-docx.py
 ```
 
-Outputs: `ein-miami-dade-aging-roofs-hurricane-season-2026.txt`, `.docx`
+Outputs:
+
+- `ein-miami-dade-aging-roofs-hurricane-season-2026.txt` — full release (archive / long form)
+- `ein-miami-dade-aging-roofs-hurricane-season-2026-ein-submit.txt` — EIN edition (≤700 words, no About / media contact)
+
+```bash
+python ../marketing/press-releases/generate-ein-docx.py          # full .docx
+python ../marketing/press-releases/generate-ein-docx.py --submit # EIN .docx
+```

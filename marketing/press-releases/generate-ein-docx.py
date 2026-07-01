@@ -1,10 +1,13 @@
 """
 Generate EIN Presswire Word document from the text press release.
-Run from repo root: python marketing/press-releases/generate-ein-docx.py
+Run from repo root:
+  python marketing/press-releases/generate-ein-docx.py
+  python marketing/press-releases/generate-ein-docx.py --submit
 """
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 from docx import Document
@@ -12,8 +15,10 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
 
 HERE = Path(__file__).resolve().parent
-TXT = HERE / "ein-miami-dade-aging-roofs-hurricane-season-2026.txt"
-DOCX = HERE / "ein-miami-dade-aging-roofs-hurricane-season-2026.docx"
+STEM = "ein-miami-dade-aging-roofs-hurricane-season-2026"
+SUBMIT = "--submit" in sys.argv
+TXT = HERE / (f"{STEM}-ein-submit.txt" if SUBMIT else f"{STEM}.txt")
+DOCX = HERE / (f"{STEM}-ein-submit.docx" if SUBMIT else f"{STEM}.docx")
 
 
 def main() -> None:

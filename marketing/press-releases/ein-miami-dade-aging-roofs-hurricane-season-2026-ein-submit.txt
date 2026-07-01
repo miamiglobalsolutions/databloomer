@@ -1,0 +1,34 @@
+FOR IMMEDIATE RELEASE
+
+MIAMI, Fla., June 30, 2026 — DataBloomer, a Miami-Dade roofing intelligence platform, released a public analysis showing where roof replacement risk is concentrated ahead of peak hurricane season. From county permit and property records, the report helps homeowners and roofing contractors see where aging roof exposure is rising and where replacement activity is likely to accelerate.
+
+The full public report is available at:
+https://www.databloomer.com/reports/miami-dade-aging-roofs-hurricane-season-2026
+
+DataBloomer's 2026 Miami-Dade Aging Roof Index analyzes 49,953 homes in a well-aged cohort (roofs over 15 years old). In that cohort, 20,729 homes score 80+ on DataBloom Score, DataBloomer's signal for near-term replacement likelihood. Average roof age in the analyzed set is 21.4 years. The analysis is produced from Miami-Dade building permit history and property appraiser records, then modeled at ZIP level so contractors and residents can compare neighborhoods without publishing individual property identifiers in the public edition.
+
+"Hurricane season always exposes the same issue: many owners do not realize their roof is in a high-risk age band until an inspection, leak, or underwriting event forces a rushed decision," said a DataBloomer spokesperson. "This report helps contractors and homeowners act earlier, with neighborhood-level visibility, instead of reacting late under storm pressure."
+
+Top-ranked ZIPs for 2026 replacement activity:
+
+1. ZIP 33034 (Florida City) — bloom score 93, 96 replacement-likely homes, avg roof age 20.5 years
+2. ZIP 33156 (Pinecrest) — bloom score 90, 328 replacement-likely homes, avg roof age 20.8 years
+3. ZIP 33194 (Miami-Dade 33194) — bloom score 89, 810 replacement-likely homes, avg roof age 22.1 years
+
+The complete Top 10 ZIP table, plus oldest-roof and highest-estimated-cost rankings, is in the full report at https://www.databloomer.com/reports/miami-dade-aging-roofs-hurricane-season-2026. Methodology, rankings, and the published as-of date are on that page for editors and trade readers.
+
+For contractors, the use case is canvassing efficiency. Random door-knocking burns fuel and labor when outreach is not aligned to where roof risk clusters. The Aging Roof Index helps crews prioritize ZIPs where aged inventory, replacement-likely scoring, and permit momentum overlap — so teams can stage routes around higher-probability opportunities before demand spikes. Sales managers can assign neighborhoods by risk intensity; business owners can time staffing and materials around likely replacement corridors.
+
+For homeowners, the report is an early-warning planning tool, not a scare tactic. Roofs in later service-life years are not automatically failing, but deterioration and weather-driven loss risk rise with age — amplified during hurricane season by wind, wind-driven rain, and contractor bottlenecks after storm alerts. If your neighborhood ranks high, schedule inspection and budgeting before emergency conditions compress your options on scope, financing, and contractor availability.
+
+Roofing companies can use the index as a planning layer: pick two or three adjacent high-index ZIPs, align canvassing with permit activity, and lead with education — roof age context and storm-readiness — rather than generic pitches. Property owners and managers can use the same data for pre-season triage: inspection sequencing, storm-prep budgets, and better questions for licensed inspectors (flashing, underlayment, wind uplift, remaining service life under South Florida exposure).
+
+Hurricane season planning is rarely linear. A forecast shift, insurance inspection cycle, or neighborhood wind event can trigger sudden surges in estimate requests. Contractors that pre-position in risk-forward ZIPs can respond with shorter lead times; homeowners in those ZIPs can document roof condition and build a decision window before severe weather shortens material and labor availability.
+
+The public index combines permit-derived age signals, neighborhood bloom modeling, and replacement-likelihood scoring, plus estimated job-size benchmarks where county heated-area data exists. "Elevated risk" does not mean imminent failure at every address; it means roof age, replacement momentum, and permit behavior point to higher probability than the county baseline — a starting point for both prospecting and household planning.
+
+Contractors moving from ZIP intelligence to route planning and lead prioritization can use DataBloomer at https://www.databloomer.com/reports/miami-dade-aging-roofs-hurricane-season-2026, https://www.databloomer.com/about, https://www.databloomer.com/subscribe, and https://www.databloomer.com/contact.
+
+The public report is ZIP-level and free to read. Subscribers get expanded canvassing workflows — mapped Bloom Zones and lead-priority tools — to act on risk patterns faster. County-scale patterns give contractors a better prospecting map and owners a clearer picture of neighborhood vulnerability before severe weather forces urgent decisions. DataBloomer emphasizes this analysis complements, not replaces, licensed inspection and contractor judgment; condition varies property to property within the same ZIP.
+
+###
